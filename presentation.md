@@ -117,6 +117,8 @@ apiClient.js  ->  cardData.js  ->  display.js         (CLI output)
 
 ### One piece up close: how `lookup` handles errors
 
+Copied from `mymanabox-js/main.js` (lines 56–85). The code is unchanged; only the notes after `//` on the marked lines were added here to explain them.
+
 ```js
 export async function cmdLookup(args) {
   const name = args.name;
@@ -131,10 +133,16 @@ export async function cmdLookup(args) {
     return 0;
   } catch (exc) {
     if (exc instanceof CardNotFoundError) {     // Scryfall said 404
-      // ambiguous -> "matched several cards", otherwise -> "No card found"
-      ...
+      if (exc.ambiguous) {                      // several cards match the name
+        display.printError(
+          `"${name}" matched several cards. Try a more specific name, such as the full card name.`
+        );
+      } else {                                  // no card matches the name
+        display.printError(`No card found for "${name}".`);
+      }
       return 1;
     }
+    // Network problems already carry a plain-language message from apiClient.js.
     if (exc instanceof http.errors.RequestError) {  // network problem
       display.printError(exc.message);
       return 1;

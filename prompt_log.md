@@ -1014,3 +1014,31 @@ README.md said a card with no power/toughness "Shows `n/a`". presentation.md sec
 - The new wording matches the live output above and the code: `display.js` prints the lookup P/T row only when both keys exist, and the compare P/T row when either card has power or toughness.
 
 ---
+
+## Entry 24: 2026-10-12 — Audit corrections, finding 7: full `cmdLookup` code in presentation.md
+
+### Prompt (verbatim)
+
+Approval of the proposed diff for finding 7, with a change:
+
+````text
+the new diff changes make sure to put back the notes next to the line of code it referrers to and I approve
+````
+
+### Finding
+
+presentation.md section 6 ("One piece up close") showed `cmdLookup` with the ambiguous/not-found branch replaced by `...`, so it did not match `mymanabox-js/main.js`.
+
+### What was done
+
+1. Proposed replacing the snippet with the real code from `main.js` (lines 56–85). The first proposal moved the explanatory notes out of the code. Mausi asked for the notes to stay next to the lines they explain, and approved with that change.
+2. presentation.md section 6: the snippet is now the full `cmdLookup` code, labeled as copied from `main.js` lines 56–85. The notes are `//` comments at the end of the lines they explain (`ask Scryfall`, `keep only what we show`, `print it`, `Scryfall said 404`, `several cards match the name`, `no card matches the name`, `network problem`, `anything else is a real bug, so let it crash loudly`).
+3. The four bullets under the snippet are unchanged.
+4. No code changed.
+
+### Checks
+
+- With the added notes removed, the snippet is identical to `main.js` lines 56–85 (checked with `diff`).
+- `npm test`: 46 tests, 46 pass.
+
+---
