@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MyManaBox · Magic card lookup</title>
+    <meta name="description" content="Search, look up and compare Magic: The Gathering cards with live Scryfall data." />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://api.scryfall.com" />
+    <link rel="preconnect" href="https://cards.scryfall.io" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#view">Skip to content</a>
+
+    <!-- Sticky glass header: brand on the left, the three views on the right -->
+    <header class="topbar">
+      <a class="brand" href="#/search" aria-label="MyManaBox home">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <defs>
+            <linearGradient id="brand-gradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#8b7bff" />
+              <stop offset="1" stop-color="#3dd9c5" />
+            </linearGradient>
+          </defs>
+          <rect x="3" y="3" width="26" height="26" rx="7" fill="url(#brand-gradient)" />
+          <path d="M16 8.5l6.5 4.75-2.5 7.6h-8l-2.5-7.6z" fill="none" stroke="#0b0d12" stroke-width="2" stroke-linejoin="round" />
+          <circle cx="16" cy="16.2" r="2.2" fill="#0b0d12" />
+        </svg>
+        <span class="brand-name">MyMana<span>Box</span></span>
+      </a>
+
+      <nav class="tabs" aria-label="Views">
+        <span class="tab-indicator" aria-hidden="true"></span>
+        <a class="tab" data-view="search" href="#/search">Search</a>
+        <a class="tab" data-view="card" href="#/card">Card</a>
+        <a class="tab" data-view="compare" href="#/compare">Compare</a>
+      </nav>
+
+      <kbd class="shortcut-hint" title="Press / to jump to the search box">/</kbd>
+    </header>
+
+    <!-- app.js renders the active view (search, card or compare) in here -->
+    <main id="view" class="view" tabindex="-1"></main>
+
+    <!-- Floating tray that collects two cards to compare -->
+    <aside class="compare-tray" aria-label="Cards to compare" hidden></aside>
+
+    <!-- Short pop-up messages (errors, "added to compare") -->
+    <div class="toasts" role="status" aria-live="polite"></div>
+
+    <footer class="footer">
+      <p>
+        Card data and images from <a href="https://scryfall.com" target="_blank" rel="noopener">Scryfall</a>.
+        Magic: The Gathering and its card images are © Wizards of the Coast. MyManaBox is a student project and
+        is not affiliated with Scryfall or Wizards of the Coast.
+      </p>
+    </footer>
+
+    <noscript><p class="noscript">MyManaBox needs JavaScript turned on.</p></noscript>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
