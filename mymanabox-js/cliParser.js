@@ -60,3 +60,66 @@ class Commands {
     return parser;
   }
 }
+
+export class CliParser {
+  constructor({ prog, description = null, epilog = null } = {}) {
+    this.prog = prog;
+    this.description = description;
+    this.epilog = epilog;
+    this.positionals = []; // [{ name, help }]
+    this.commands = null;
+  }
+
+  /** Add a required positional argument, e.g. "name". */
+  addArgument(name, { help = null } = {}) {
+    this.positionals.push({ name, help });
+  }
+
+  /** Give this parser sub-commands; returns the Commands object to add them to. */
+  addCommands({ dest, metavar }) {
+    this.commands = new Commands(this, dest, metavar);
+    return this.commands;
+  }
+
+  formatUsage() {
+    const parts = [this.prog, "[-h]", ...this.positionals.map((p) => p.name)];
+    if (this.commands) parts.push(`${this.commands.metavar} ...`);
+    return `usage: ${parts.join(" ")}\n`;
+  }
+
+  formatHelp() {
+    const sections = [this.formatUsage().trimEnd()];
+    if (this.description) sections.push(this.description);
+
+    const positionalRows = this.positionals.map((p) => [2, p.name, p.help]);
+    if (this.commands) {
+      positionalRows.push([2, this.commands.metavar, null]);
+      for (const [name, { help }] of this.commands.choices) {
+        positionalRows.push([4, name, help]);
+      }
+    }
+    const optionRows = [[2, HELP_INVOCATION, HELP_TEXT]];
+
+    // Every help text lines up in one column, so measure both groups together
+    const allLines = formatRows([...positionalRows, ...optionRows]);
+    const positionalLines = allLines.slice(0, positionalRows.length);
+    const optionLines = allLines.slice(positionalRows.length);
+
+    if (positionalLines.length) {
+      sections.push(["positional arguments:", ...positionalLines].join("\n"));
+    }
+    sections.push(["options:", ...optionLines].join("\n"));
+    if (this.epilog) sections.push(this.epilog.trimEnd());
+    return sections.join("\n\n") + "\n";
+  }
+
+  printHelp() {
+    streams.stdout.write(this.formatHelp());
+  }
+
+  /** Print usage and the error to stderr, then exit with status 2. */
+  error(message) {
+    streams.stderr.write(this.formatUsage());
+    streams.stderr.write(`${this.prog}: error: ${message}\n`);
+    throw new CliExit(2);
+  }
