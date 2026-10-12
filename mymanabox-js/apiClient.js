@@ -17,3 +17,19 @@ import { http } from "./http.js";
 export const USER_AGENT = "MyManaBox/1.0 (github.com/StrayDogSyn/scryfall-cli)";
 export const BASE_URL = "https://api.scryfall.com";
 export const TIMEOUT = 10; // seconds; http.get turns this into milliseconds
+
+/**
+ * Thrown when Scryfall returns 404 for a card lookup.
+ *
+ * Scryfall uses 404 for two different cases:
+ *   - No card matched the name at all.
+ *   - The fuzzy name matched several cards (ambiguous).
+ * The `ambiguous` property lets the caller print a targeted message.
+ */
+export class CardNotFoundError extends Error {
+  constructor(message, ambiguous = false) {
+    super(message);
+    this.name = "CardNotFoundError";
+    this.ambiguous = ambiguous;
+  }
+}
