@@ -622,7 +622,7 @@ Ensure all project assignment rubrics are being met with this assignment. Adjust
 
 ## Entry 15: 2026-10-12 — Match presentation.md to the Demo Day rubric
 
-### Prompt (verbatim)
+### Prompt (first three lines verbatim; the rest summarized)
 
 ````text
 This is the demo day application submission
