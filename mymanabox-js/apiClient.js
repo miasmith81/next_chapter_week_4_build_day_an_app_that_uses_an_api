@@ -115,3 +115,60 @@ export async function fetchCardByName(name) {
     throw exc; // anything else is a real bug: let it crash loudly
   }
 }
+
+/**
+ * Search for cards matching a Scryfall query string.
+ *
+ * Returns the first page of results (up to 175 cards per page).
+ *
+ * @param {string} query Full Scryfall search syntax, e.g. "t:goblin c:r".
+ * @returns {Promise<object[]>} Array of raw Scryfall card objects.
+ * @throws {CardNotFoundError} When the query matches nothing.
+ * @throws {http.errors.RequestTimeoutError} When Scryfall does not answer in time.
+ * @throws {http.errors.ConnectionError} When Scryfall cannot be reached.
+ * @throws {http.errors.HttpError} On other 4xx and 5xx responses.
+ * @throws {http.errors.RequestError} On any other network failure.
+ */
+export async function searchCards(query) {
+  await timer.sleep(100); // 100 ms pause: respects Scryfall's rate limit
+  try {
+    const response = await http.get(`${BASE_URL}/cards/search`, {
+      params: { q: query },
+      headers: buildHeaders(),
+      timeout: TIMEOUT,
+    });
+    if (response.statusCode === 404) {
+      throw new CardNotFoundError(`No cards found for query: ${query}`);
+    }
+    response.raiseForStatus();
+    const data = response.json();
+    // TODO: pagination via data["has_more"] and data["next_page"]
+    return getKey(data, "data", []);
+  } catch (exc) {
+    // Same error translation as fetchCardByName.
+    if (exc instanceof CardNotFoundError) {
+      throw exc;
+    }
+    if (exc instanceof http.errors.RequestTimeoutError) {
+      throw new http.errors.RequestTimeoutError(
+        `Scryfall did not respond within ${TIMEOUT}s. Check your connection.`
+      );
+    }
+    if (exc instanceof http.errors.ConnectionError) {
+      throw new http.errors.ConnectionError(
+        "Could not reach Scryfall. Check your internet connection."
+      );
+    }
+    if (exc instanceof http.errors.HttpError) {
+      throw new http.errors.HttpError(`Scryfall returned an error: ${exc.message}`, {
+        cause: exc,
+      });
+    }
+    if (exc instanceof http.errors.RequestError) {
+      throw new http.errors.RequestError(`Unexpected network error: ${exc.message}`, {
+        cause: exc,
+      });
+    }
+    throw exc;
+  }
+}
