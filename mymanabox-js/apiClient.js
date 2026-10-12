@@ -58,3 +58,28 @@ export async function fetchCardByName(name) {
       headers: buildHeaders(),
       timeout: TIMEOUT,
     });
+    if (response.statusCode === 404) {
+      // A proxy or CDN can replace Scryfall's JSON error with an HTML or
+      // plain-text page. A 404 is still a normal "not found", so a body that
+      // is not JSON must not skip the friendly error below.
+      let body;
+      try {
+        body = response.json();
+      } catch (err) {
+        if (err instanceof http.errors.JsonParseError || err instanceof TypeError) {
+          body = {};
+        } else {
+          throw err;
+        }
+      }
+      // Only a plain object can carry a "details" message.
+      const isObject = typeof body === "object" && body !== null && !Array.isArray(body);
+      let details = isObject ? getKey(body, "details", "") : "";
+      if (typeof details !== "string") {
+        details = "";
+      }
+      // Scryfall says "too many cards" when the fuzzy name is ambiguous.
+      const ambiguous =
+        details.toLowerCase().includes("too many") || details.toLowerCase().includes("ambiguous");
+      throw new CardNotFoundError(details || `No card found: ${name}`, ambiguous);
+    }
