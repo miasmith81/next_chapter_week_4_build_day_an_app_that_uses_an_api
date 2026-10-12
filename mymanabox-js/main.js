@@ -68,8 +68,7 @@ export async function cmdLookup(args) {
     if (exc instanceof CardNotFoundError) {
       if (exc.ambiguous) {
         display.printError(
-          `"${name}" matched several cards. Try a more specific name ` +
-            `or add a set code (e.g. "lightning bolt" -> "lightning bolt lea").`
+          `"${name}" matched several cards. Try a more specific name, such as the full card name.`
         );
       } else {
         display.printError(`No card found for "${name}".`);

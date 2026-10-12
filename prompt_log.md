@@ -902,3 +902,34 @@ In the web app, the search, card and compare forms submit by setting `location.h
 - The usual web checks with a fake Scryfall still pass: search ("12 result(s) returned."), sort by price, ambiguous-name message, "Lower price" badge, empty-search toast, no sideways scrolling on a phone.
 
 ---
+
+## Entry 20: 2026-10-12 — Audit corrections, finding 3: the ambiguous-name tip
+
+### Prompt (verbatim)
+
+Approval of the proposed diff for finding 3:
+
+````text
+approve
+````
+
+### Finding
+
+When a name matched several cards, the CLI and the web app said "Try a more specific name or add a set code (e.g. "lightning bolt" -> "lightning bolt lea")." That tip didn't work: `apiClient.js` sends the whole text to Scryfall as the `fuzzy` name, and the audit's live run returned a Marvel Super Heroes Commander printing, not Limited Edition Alpha. The original Python program has the same tip.
+
+### What was done
+
+1. Showed the proposed diff and explanation; Mausi approved it.
+2. `main.js` (CLI) and `web/cardView.js` (web) now both say: `"<name>" matched several cards. Try a more specific name, such as the full card name.`
+3. `tests/main.test.js` and `tests/cardView.test.js` now check the full sentence, so the CLI and web wording must match exactly.
+4. `presentation.md` section 7 shows the new output.
+5. The README row ("Try a more specific name ...") was still accurate, so it was left as is. Earlier prompt_log entries keep the old wording as history. No set-selection feature was added.
+6. Translation note: this message now differs from the original Python program on purpose.
+
+### Checks
+
+- `npm test` on the Mac (Node v26.0.0): `# pass 46`, `# fail 0`.
+- Live on the Mac: `node main.js lookup "bolt"` prints `Error: "bolt" matched several cards. Try a more specific name, such as the full card name.` and exits 1. `lookup "lightning bolt"` still finds Lightning Bolt.
+- The web app with a fake Scryfall shows the same sentence for `bolt`.
+
+---

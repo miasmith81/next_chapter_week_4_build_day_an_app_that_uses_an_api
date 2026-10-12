@@ -163,8 +163,8 @@ $ node main.js lookup "zzzzzzzz"
   Error: No card found for "zzzzzzzz".                  (exit 1)
 
 $ node main.js lookup "bolt"
-  Error: "bolt" matched several cards. Try a more specific name or add a set code
-  (e.g. "lightning bolt" -> "lightning bolt lea").      (exit 1)
+  Error: "bolt" matched several cards. Try a more specific name, such as the full card name.
+                                                        (exit 1)
 
 $ node main.js
   usage: mymanabox [-h] <command> ...

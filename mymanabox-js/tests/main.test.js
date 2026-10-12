@@ -49,7 +49,7 @@ test("lookup rejects blank input without network call", async () => {
 test("lookup reports not found and ambiguous errors", async (t) => {
   const cases = [
     [false, "No card found", "No cards found matching that"],
-    [true, "matched several cards", "Too many cards match"],
+    [true, '"jace" matched several cards. Try a more specific name, such as the full card name.', "Too many cards match"],
   ];
   for (const [ambiguous, expected, details] of cases) {
     await t.test(`ambiguous=${ambiguous}`, async () => {

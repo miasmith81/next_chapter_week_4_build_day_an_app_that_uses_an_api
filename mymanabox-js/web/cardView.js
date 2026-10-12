@@ -141,8 +141,7 @@ export function errorMessage(exc, command, input = "") {
   if (exc instanceof CardNotFoundError) {
     if (command === "lookup") {
       return exc.ambiguous
-        ? `"${input}" matched several cards. Try a more specific name ` +
-            `or add a set code (e.g. "lightning bolt" -> "lightning bolt lea").`
+        ? `"${input}" matched several cards. Try a more specific name, such as the full card name.`
         : `No card found for "${input}".`;
     }
     if (command === "compare") {

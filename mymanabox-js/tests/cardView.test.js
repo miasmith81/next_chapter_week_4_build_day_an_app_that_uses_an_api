@@ -95,7 +95,10 @@ test("error messages match the CLI wording", () => {
   const ambiguous = new CardNotFoundError("Too many cards", true);
   const missing = new CardNotFoundError("No card found");
 
-  assert.ok(errorMessage(ambiguous, "lookup", "bolt").startsWith('"bolt" matched several cards.'));
+  assert.equal(
+    errorMessage(ambiguous, "lookup", "bolt"),
+    '"bolt" matched several cards. Try a more specific name, such as the full card name.'
+  );
   assert.equal(errorMessage(missing, "lookup", "zzzz"), 'No card found for "zzzz".');
   assert.equal(errorMessage(missing, "compare"), "One or both cards were not found.");
   assert.equal(errorMessage(missing, "search", "t:nothing"), 'No cards found for query: "t:nothing".');
