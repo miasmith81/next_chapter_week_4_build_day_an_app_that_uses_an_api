@@ -36,3 +36,15 @@ export class CliExit extends Error {
     this.code = code;
   }
 }
+
+/**
+ * Read obj[key], or return fallback when the key is ABSENT.
+ * A key that is present with the value null comes back as null, so this
+ * cannot be written as obj[key] ?? fallback (?? would also replace null).
+ */
+export function getKey(obj, key, fallback = null) {
+  if (typeof obj !== "object" || obj === null || Array.isArray(obj)) {
+    throw new TypeError(`Cannot read key "${key}" from a non-object value`);
+  }
+  return Object.hasOwn(obj, key) ? obj[key] : fallback;
+}
