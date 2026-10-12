@@ -48,3 +48,8 @@ export function getKey(obj, key, fallback = null) {
   }
   return Object.hasOwn(obj, key) ? obj[key] : fallback;
 }
+
+/** First character upper case, the rest lower case: "mYTHIC" -> "Mythic". */
+export function capitalize(text) {
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
