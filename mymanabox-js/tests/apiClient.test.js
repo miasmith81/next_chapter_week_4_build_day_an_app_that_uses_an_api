@@ -102,3 +102,17 @@ test("search 404 raises not found", async () => {
 
   await assert.rejects(apiClient.searchCards("no:matches"), apiClient.CardNotFoundError);
 });
+
+test("the User-Agent comes from .env when it is set", () => {
+  const saved = process.env.SCRYFALL_USER_AGENT;
+  try {
+    delete process.env.SCRYFALL_USER_AGENT;
+    assert.equal(apiClient.buildHeaders()["User-Agent"], apiClient.USER_AGENT);
+
+    process.env.SCRYFALL_USER_AGENT = "MyManaBox/1.0 (test)";
+    assert.equal(apiClient.buildHeaders()["User-Agent"], "MyManaBox/1.0 (test)");
+  } finally {
+    if (saved === undefined) delete process.env.SCRYFALL_USER_AGENT;
+    else process.env.SCRYFALL_USER_AGENT = saved;
+  }
+});

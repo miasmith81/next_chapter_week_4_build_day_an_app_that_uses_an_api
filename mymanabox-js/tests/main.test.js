@@ -108,3 +108,20 @@ test("parser dispatches supported commands", () => {
   assert.deepEqual([compare.name_a, compare.name_b], ["black lotus", "mox pearl"]);
   assert.deepEqual([search.command, search.query], ["search", "t:goblin"]);
 });
+
+test("loadEnv reads a .env file, and is fine when there is none", async () => {
+  const { mkdtemp, writeFile, rm } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const folder = await mkdtemp(join(tmpdir(), "mymanabox-"));
+  try {
+    await writeFile(join(folder, ".env"), "MYMANABOX_TEST_SETTING=hello\n");
+
+    assert.equal(main.loadEnv(join(folder, ".env")), true);
+    assert.equal(process.env.MYMANABOX_TEST_SETTING, "hello");
+    assert.equal(main.loadEnv(join(folder, "missing.env")), false);
+  } finally {
+    delete process.env.MYMANABOX_TEST_SETTING;
+    await rm(folder, { recursive: true });
+  }
+});

@@ -4,7 +4,7 @@
   "description": "MyManaBox: Magic: The Gathering card lookup via Scryfall",
   "type": "module",
   "main": "main.js",
-  "engines": { "node": ">=20" },
+  "engines": { "node": ">=20.12" },
   "scripts": {
     "test": "node --test",
     "web": "node web/server.js"

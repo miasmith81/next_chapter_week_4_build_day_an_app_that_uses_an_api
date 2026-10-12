@@ -32,11 +32,24 @@ node main.js --help
 | Missing command or wrong arguments | Usage help | 2 |
 | Card has no price or no power/toughness | Shows `n/a` instead of `null` | 0 |
 
+### Settings and secrets (`.env`)
+
+API keys and settings belong in a `.env` file, never in the code. `.env` is listed in `mymanabox-js/.gitignore`, so Git never commits it. `.env.example` is committed instead, to show which settings exist without any real values.
+
+```bash
+cd mymanabox-js
+cp .env.example .env    # then edit .env with your own values
+```
+
+`main.js` loads `.env` when it starts, using Node's built-in `process.loadEnvFile` (Node 20.12 or newer), so there are no packages to install. Scryfall is free and needs no API key, so the only setting today is `SCRYFALL_USER_AGENT`, the contact name the app sends to Scryfall. Without a `.env`, the app uses its default.
+
+The web app on GitHub Pages can't use `.env`. Anything a browser downloads is public, so a real secret key would need its own server.
+
 ### Tests
 
 ```bash
 cd mymanabox-js
-npm test        # 44 tests, all offline (Scryfall is faked)
+npm test        # 46 tests, all offline (Scryfall is faked)
 ```
 
 ## MyManaBox web app
@@ -50,7 +63,7 @@ A browser version of the `mymanabox-js` command-line app. It reuses the same Jav
 ```bash
 cd mymanabox-js
 npm run web        # then open http://localhost:5173/web/
-npm test           # 44 tests, including the web helpers
+npm test           # 46 tests, including the web helpers
 ```
 
 ### What it does

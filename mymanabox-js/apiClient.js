@@ -14,6 +14,7 @@ import { timer, getKey } from "./utils.js";
 import { http } from "./http.js";
 
 // Scryfall asks every client to identify itself with a User-Agent header.
+// This is the default; SCRYFALL_USER_AGENT in the .env file replaces it (see .env.example).
 export const USER_AGENT = "MyManaBox/1.0 (github.com/StrayDogSyn/scryfall-cli)";
 export const BASE_URL = "https://api.scryfall.com";
 export const TIMEOUT = 10; // seconds; http.get turns this into milliseconds
@@ -36,7 +37,10 @@ export class CardNotFoundError extends Error {
 
 /** Return the standard request headers, including the User-Agent. */
 export function buildHeaders() {
-  return { "User-Agent": USER_AGENT, Accept: "application/json" };
+  // Read the setting each time, so it works after main.js loads .env.
+  // globalThis.process does not exist in the browser, so the web app uses the default.
+  const userAgent = globalThis.process?.env.SCRYFALL_USER_AGENT || USER_AGENT;
+  return { "User-Agent": userAgent, Accept: "application/json" };
 }
 
 /**

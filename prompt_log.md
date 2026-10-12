@@ -644,3 +644,36 @@ Demo Day — Show Your API App
 6. No app code was changed.
 
 ---
+
+## Entry 16: 2026-10-12 — .env file for settings and keys
+
+### Prompts (verbatim)
+
+````text
+where is the .env file and it's protected keys ? this was the primary focus of this assignment
+````
+
+Decision card answer: Chose "Add .env pattern" on the decision card asking "Add a .env file to MyManaBox even though Scryfall has no secret key?"
+
+### Roadblock
+
+There was no `.env` file because Scryfall is free and needs no API key. `mymanabox-js/.gitignore` already listed `.env`. Per the rule "stop and tell me the road block", Claude stopped and offered three choices: add the `.env` pattern, explain only, or switch to an API that needs a key. Mausi chose to add the `.env` pattern.
+
+### What was done
+
+1. Added `mymanabox-js/.env.example` (committed): setting names with placeholder values, and a comment showing where an API key would go.
+2. `main.js`: new `loadEnv()` that loads `.env` with Node's built-in `process.loadEnvFile`. It returns `false` when there is no `.env`. The entry point calls it before `main()`.
+3. `apiClient.js`: `buildHeaders()` now uses `SCRYFALL_USER_AGENT` from `.env` when it is set, otherwise the default `USER_AGENT`. In the browser, where `process` doesn't exist, the web app keeps the default.
+4. `package.json`: `engines` is now `>=20.12`, the first Node 20 release with `process.loadEnvFile`.
+5. Two new tests: one for the User-Agent override, one for `loadEnv` with and without a file.
+6. README.md and presentation.md (new section 7a) explain where `.env` lives, why it never reaches GitHub, and why GitHub Pages can't hide a key.
+7. Created `mymanabox-js/.env` on Mausi's Mac only (not committed).
+
+### Checks
+
+- `npm test`: `# pass 46`, `# fail 0`.
+- `git check-ignore -v mymanabox-js/.env` prints `mymanabox-js/.gitignore:2:.env`, and `git status` doesn't list `.env`.
+- With `.env` in place, the request header is `User-Agent: MyManaBox/1.0 (github.com/miasmith81)`.
+- Web app re-tested with a fake Scryfall: search, compare and phone layout still work.
+
+---

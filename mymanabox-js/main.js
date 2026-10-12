@@ -16,7 +16,7 @@
  *   node main.js search "t:goblin c:r"
  */
 
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { CliParser } from "./cliParser.js";
 import { CliExit, getKey } from "./utils.js";
@@ -25,6 +25,23 @@ import { http } from "./http.js";
 import * as display from "./display.js";
 import { CardNotFoundError, fetchCardByName, searchCards } from "./apiClient.js";
 import { compareCards, extractCardSummary } from "./cardData.js";
+
+/**
+ * Load settings (and any API keys) from mymanabox-js/.env into process.env.
+ * .env is listed in .gitignore, so its values never reach GitHub.
+ * Returns false when there is no .env file; the app then uses its defaults.
+ */
+export function loadEnv(path = fileURLToPath(new URL(".env", import.meta.url))) {
+  try {
+    process.loadEnvFile(path);
+    return true;
+  } catch (exc) {
+    if (exc.code === "ENOENT") {
+      return false;
+    }
+    throw exc;
+  }
+}
 
 /** Return true when value has text; otherwise print an error and return false. */
 export function validateNonEmpty(value, label) {
@@ -191,6 +208,7 @@ export async function main() {
 // Run main() only when this file is started with `node main.js`, not when a
 // test imports it. process.argv[1] is the path of the file Node was asked to run.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  loadEnv();
   try {
     process.exitCode = await main();
   } catch (exc) {

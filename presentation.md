@@ -59,6 +59,7 @@ Then open the live web app and search `t:dragon r:mythic`. Open a card to show i
 |---|---|---|
 | **Meets the spec:** calls an API | ✅ | Every card comes from `https://api.scryfall.com`. `mymanabox-js/apiClient.js` makes the requests for both the CLI and the web app. |
 | **Meets the spec:** handles errors | ✅ | Blank input, unknown card, ambiguous name, empty search, no internet, timeout and server errors each print a clear message (section 7). |
+| **Protected keys:** `.env` file | ✅ | `main.js` loads settings from `mymanabox-js/.env`, which `.gitignore` keeps out of GitHub. `.env.example` shows the settings with no real values (section 7a). |
 | **Meets the spec:** on GitHub | ✅ | Everything is on `main`, and the web app is live on GitHub Pages. |
 | **Build skill:** it runs and shows real data, verified | ✅ | CLI output was compared field by field with Scryfall's JSON (BUILD_SUMMARY.md, section 4). The live site was checked in Chrome on 2026-10-12. |
 | **Control:** reviewed diffs, small commits | ✅ | Each piece followed "ask, review the diff, accept, test, verify the data, commit" (prompt_log Entry 2). `main` has 64 commits, and most add one piece: 46 "Step" commits for the CLI and 11 "Web UI" commits. |
@@ -98,14 +99,15 @@ apiClient.js  ->  cardData.js  ->  display.js         (CLI output)
 
 | File | Its job, in plain words |
 |---|---|
-| `mymanabox-js/main.js` | Reads the command (lookup, compare or search), calls the other files in order, and sets the exit code: 0 worked, 1 failed, 2 used wrong. |
+| `mymanabox-js/main.js` | Loads `.env`, reads the command (lookup, compare or search), calls the other files in order, and sets the exit code: 0 worked, 1 failed, 2 used wrong. |
 | `mymanabox-js/cliParser.js` | Turns the words typed after `node main.js` into an object like `{ command: "lookup", name: "sol ring" }` and prints help text. |
 | `mymanabox-js/apiClient.js` | The only file that talks to Scryfall. It waits 100 ms between requests, sends a User-Agent header, and turns failures into clear messages. |
 | `mymanabox-js/http.js` | A small wrapper around `fetch` that adds a 10-second timeout and gives each kind of failure its own error class. |
 | `mymanabox-js/cardData.js` | Picks the fields we need out of Scryfall's large JSON object (name, cost, type, rarity, set, price, power and toughness). It never prints anything. |
 | `mymanabox-js/display.js` | Prints the results in lined-up columns. Missing values become `n/a`, never `null`. |
+| `mymanabox-js/.env.example` | The template for `.env`: setting names with placeholder values. The real `.env` is git-ignored (section 7a). |
 | `mymanabox-js/utils.js` | Small helpers: `getKey` (read a key that might be missing), `capitalize`, number formatting. |
-| `mymanabox-js/tests/` | 44 tests that use a fake Scryfall, so they run offline and always give the same result. |
+| `mymanabox-js/tests/` | 46 tests that use a fake Scryfall, so they run offline and always give the same result. |
 | `mymanabox-js/web/index.html` | The page shell: header, the Search / Card / Compare tabs, and the footer that credits Scryfall. |
 | `mymanabox-js/web/styles.css` | The look: dark theme, card tilt and foil shine, loading shimmer, and layouts for phone and desktop. |
 | `mymanabox-js/web/app.js` | The web app's logic: reads the address bar (`#/card/sol ring`), fetches the card and builds the page. |
@@ -180,6 +182,52 @@ The web app shows the same messages in a red notice box, using the same wording 
 
 ---
 
+## 7a. Protecting keys with `.env`
+
+**Where things live**
+
+| File | In GitHub? | What it holds |
+|---|---|---|
+| `mymanabox-js/.env` | **No**, it's listed in `.gitignore` | Your real settings and keys. It stays only on your computer. |
+| `mymanabox-js/.env.example` | Yes | The same setting names with placeholder values, so others know what to fill in. |
+| `mymanabox-js/.gitignore` | Yes | The line `.env` tells Git never to commit that file. |
+
+**How the app reads it.** In `main.js`:
+
+```js
+export function loadEnv(path = fileURLToPath(new URL(".env", import.meta.url))) {
+  try {
+    process.loadEnvFile(path);   // copies each NAME=value line into process.env
+    return true;
+  } catch (exc) {
+    if (exc.code === "ENOENT") { // ENOENT = "no such file": no .env, use defaults
+      return false;
+    }
+    throw exc;
+  }
+}
+```
+
+Then `apiClient.js` reads the value instead of having it typed into the code:
+
+```js
+const userAgent = globalThis.process?.env.SCRYFALL_USER_AGENT || USER_AGENT;
+```
+
+**Being honest about it.** Scryfall is free and needs no API key, so the `.env` holds a setting (the contact name sent to Scryfall), not a secret. The same file is where a key would go, for example `SOME_API_KEY=...`, and the code would read it from `process.env` in the same way.
+
+**Show it in the demo (optional, 15 seconds):**
+
+```bash
+cat .env.example            # the committed template, with no real values
+git check-ignore -v .env    # proves Git ignores .env: ".gitignore:2:.env  .env"
+git status                  # .env does not appear
+```
+
+**Why the web app can't hide a key.** GitHub Pages only serves files to the browser, and anything the browser downloads is public. A real secret key would need a small server that adds the key and passes the request on to the API.
+
+---
+
 ## 8. Mistakes caught and fixed
 
 | # | What went wrong | How it was caught | The fix |
@@ -194,7 +242,7 @@ The web app shows the same messages in a red notice box, using the same wording 
 
 ## 9. Testing
 
-- `cd mymanabox-js && npm test` gives **44 tests, 44 pass, 0 fail**.
+- `cd mymanabox-js && npm test` gives **46 tests, 46 pass, 0 fail**.
 - **Unit tests** cover the request shape, 404 handling, error messages, data clean-up, every print function, the command parser and the web helpers.
 - **Live data check:** CLI output was compared field by field with Scryfall's own JSON for lightning bolt, sol ring, black lotus vs mox pearl, and `t:goblin c:r`. They all matched.
 - **Web app** was tested in Chrome against live Scryfall: search returned "122 result(s) returned." for `t:dragon r:mythic`, and there was no sideways scrolling at phone width.
