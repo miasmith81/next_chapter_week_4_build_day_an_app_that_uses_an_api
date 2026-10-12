@@ -984,3 +984,33 @@ README.md line 7 said "Node 20 or newer", but `package.json` requires `>=20.12` 
 - **Not tested:** a live Scryfall lookup under Node 20.12, because the cloud workspace can't reach Scryfall. Mausi's Mac has Node 23–26 only. Live lookups were tested on Node 26.
 
 ---
+
+## Entry 23: 2026-10-12 — Audit corrections, finding 6: missing power/toughness
+
+### Prompt (verbatim)
+
+Approval of the proposed diff for finding 6:
+
+````text
+approve
+````
+
+### Finding
+
+README.md said a card with no power/toughness "Shows `n/a`". presentation.md section 7 said the same about Sol Ring. Checked live on Mausi's Mac:
+- `lookup "sol ring"` leaves out the P/T row entirely.
+- `compare "sol ring" "grizzly bears"` shows `P/T: n/a | P/T: 2/2`.
+- `compare "black lotus" "sol ring"` has no P/T row, because neither card is a creature. Black Lotus's price shows `n/a`.
+
+### What was done
+
+1. Showed the proposed diff and explanation; Mausi approved it.
+2. README.md: split the row into "no price" (shows `n/a`) and "no power/toughness" (`lookup` leaves out the P/T row; `compare` shows `P/T: n/a` next to a card that has power/toughness).
+3. presentation.md section 7: the "Missing data" line now describes the same two behaviors.
+4. No code changed.
+
+### Checks
+
+- The new wording matches the live output above and the code: `display.js` prints the lookup P/T row only when both keys exist, and the compare P/T row when either card has power or toughness.
+
+---

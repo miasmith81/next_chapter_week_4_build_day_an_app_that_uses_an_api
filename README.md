@@ -30,7 +30,8 @@ node main.js --help
 | Search with no results | `Error: No cards found for query: "..."` | 1 |
 | No internet, timeout, or a server error | A plain-language message instead of a crash | 1 |
 | Missing command or wrong arguments | Usage help | 2 |
-| Card has no price or no power/toughness | Shows `n/a` instead of `null` | 0 |
+| Card has no price, e.g. `lookup "black lotus"` | Shows `n/a` instead of `null` | 0 |
+| Card has no power/toughness, e.g. `lookup "sol ring"` | `lookup` leaves out the P/T row. `compare` shows `P/T: n/a` for that card when the other card has power/toughness. | 0 |
 
 ### Settings and secrets (`.env`)
 

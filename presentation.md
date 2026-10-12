@@ -176,7 +176,7 @@ These are also handled:
 - **No internet:** "Could not reach Scryfall. Check your internet connection."
 - **Too slow:** "Scryfall did not respond within 10s. Check your connection."
 - **Server error:** "Scryfall returned an error: ..."
-- **Missing data:** Sol Ring has no power or toughness, and Black Lotus has no price. Both show `n/a` instead of crashing.
+- **Missing data:** Black Lotus has no price, so it shows `n/a`. Sol Ring has no power or toughness, so `lookup` leaves out the P/T row, and `compare` shows `P/T: n/a` for it next to a creature. Nothing crashes.
 
 The web app shows the same messages in a red notice box, using the same wording as the CLI.
 
