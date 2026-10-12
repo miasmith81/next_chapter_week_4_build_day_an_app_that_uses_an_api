@@ -25,3 +25,12 @@ import { http } from "./http.js";
 import * as display from "./display.js";
 import { CardNotFoundError, fetchCardByName, searchCards } from "./apiClient.js";
 import { compareCards, extractCardSummary } from "./cardData.js";
+
+/** Return true when value has text; otherwise print an error and return false. */
+export function validateNonEmpty(value, label) {
+  if (!value || !value.trim()) {
+    display.printError(`${label} cannot be empty.`);
+    return false;
+  }
+  return true;
+}
