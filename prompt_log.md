@@ -301,3 +301,148 @@ When Claude Code tried to clone scryfall-cli onto the machine, Mausi rejected it
 4. Stopped for Mausi's review. No commit yet (Step 1 commits after 1.7).
 
 ---
+
+## Entry 9: 2026-10-12 02:22 UTC — Build evaluation from GitHub
+
+### Prompt (Mausi)
+
+> claude I need you to go to my github repo and evaluate and let me the were we are at. give me think step by step detailed evaluation.
+
+### What Claude did
+
+1. Found the build repo `miasmith81/next_chapter_week_4_build_day_an_app_that_uses_an_api` (pushed 2026-10-12 02:18 UTC), cloned it, and read all 4 commits and `prompt_log.md` (Entries 1–8).
+2. Compared every committed file against the handoff and the Entry 6 "JavaScript only" rename plan, and ran the `utils.js` checks.
+3. Wrote [build_evaluation_2026-10-12.md](/mnt/project-files/python-to-js/build_evaluation_2026-10-12.md).
+
+### Findings
+
+- **Progress:** 5 of 50 code pieces are done (Step 0.1, 0.2, 1.1, 1.2, 1.3). Next piece: **Step 1.4 `getKey`**.
+- **Correctness:** `package.json` and `.gitignore` match the handoff exactly. `streams`, `print`, `timer.sleep`, `InvalidValueError` and `CliExit` are correct and match the rename plan. Checks pass. `npm test` runs 0 tests, which is expected before Step 8.
+- **Dropping `AttributeError`** for the built-in `TypeError` is safe: `getKey` is never called inside a `try` that catches `TypeError`.
+- **Log vs. history:** Entries 7 and 8 say "No commit yet", but commits `5afd8fc` and `c4fcf0c` were made after 1.2 and 1.3. The history is fine; only the log text is out of date.
+- **Watch next:** `sleep` is now in milliseconds, so Step 4.4/4.7 must call `timer.sleep(100)` (not `0.1`), and the Step 8.2 test must expect `[100]`. Rename code names only, never printed text, and keep Scryfall's snake_case data keys.
+
+### Note on this file
+
+This project copy was synced from the repo's `prompt_log.md` (Entries 3–8 were written by Claude Code in VS Code), and Entry 9 was added here. The repo copy doesn't have Entry 9 yet.
+
+---
+
+## Entry 10: 2026-10-12 02:48 UTC — Resume the build: repo check and log sync
+
+### Prompt (Mausi)
+
+````text
+You are continuing my MyManaBox JavaScript build in this VS Code project. Work step by step, one small piece at a time. Do not move to the next piece until I type "approve".
+
+## 1. The three files I gave you, and which one wins
+
+- `HANDOFF_python_to_javascript.md`: the 50 code pieces in order (Steps 0–8), the check for each piece, and Step 9 (live verification). Use it for **what** each piece does and **in what order**.
+- `prompt_log.md`: the build history. **Entry 6's rename plan overrides the handoff's names.** Every file, function, class and property gets the JavaScript name from that table (`utils.js`, `http.js`, `cliParser.js`, `apiClient.js`, `cardData.js`, `getKey`, `toNumber`, `formatFixed`, `http.get`, `statusCode`, `raiseForStatus()`, `CliParser`, `fetchCardByName`, `formatPrice`, `cmdLookup`, and so on).
+- `build_evaluation_2026-10-12.md`: where the build stands (5 of 50 pieces done; next is Step 1.4) and the watch-outs in its section 3.
+
+If two files disagree: my words in this prompt win first, then the Entry 6 rename plan, then the handoff. If something is still unclear, **stop and tell me the roadblock** instead of guessing.
+
+## 2. Rules for every piece
+
+1. **JavaScript only.** No Python code, Python names, Python comments, or Python lessons anywhere in the build. Skip the handoff's "Python" snippets and "Python syntax explained" notes; explain the JavaScript instead.
+2. **No extra code.** Build only what the handoff piece contains, renamed. Don't add features, libraries, pagination, retries, colors or refactors. The search pagination `TODO` stays a `TODO`.
+3. **Rename code names only, never text the program prints.** Keep these exactly as the handoff writes them:
+   - Every printed or error string (for example `show this help message and exit`, `usage: mymanabox [-h] <command> ...`, `the following arguments are required:`, `invalid choice:`, `Error: Card name cannot be empty.`, `Scryfall did not respond within 10s. Check your connection.`, `No card found for "..."`, `result(s) returned.`, `n/a`, the `$0.79` price format).
+   - The help epilog lines, which say `node main.js ...`.
+   - Scryfall's data keys in snake_case: `name`, `mana_cost`, `cmc`, `type_line`, `rarity`, `set_name`, `oracle_text`, `artist`, `released_at`, `price_usd`, `prices`, `usd`, `power`, `toughness`, `legalities`, `details`, `data`, `has_more`, `next_page`.
+   - Query parameter names `fuzzy` and `q`, the User-Agent string, `BASE_URL`, and `TIMEOUT = 10`.
+4. **Sleep is in milliseconds.** In Step 4.4 and Step 4.7 write `await timer.sleep(100)`, not `0.1`. In Step 8.2 the test expects `[100]`, not `[0.1]`. The request timeout stays `TIMEOUT = 10` seconds, so `http.get` keeps `timeout * 1000`.
+5. **`getKey` keeps "missing key" semantics.** It returns the stored value even when that value is `null`, uses the fallback only when the key is **absent** (`Object.hasOwn`), and throws `TypeError` when the object isn't a plain object. Never replace it with `?.` or `??`.
+6. **Keep behavior identical:** the same return values, the same exit codes (0 success, 1 error, 2 usage error), and `cmdCompare` fetches card A and then card B one after the other (no `Promise.all`).
+7. **Rename tests to match.** Test files are `tests/apiClient.test.js`, `tests/cardData.test.js`, `tests/display.test.js`, `tests/main.test.js` and `tests/helpers.js`. Use the new names inside them (`timer`, `http`, `streams`, `statusCode`, `raiseForStatus`, ...) and keep every assertion's meaning. Keep the test descriptions readable in plain English, without Python names.
+
+## 3. The loop for each piece (ask → review the diff → accept → test → verify the data → commit)
+
+For each piece, in this exact order:
+
+1. **Say which piece is next**: the handoff step number, the file, and one sentence on what it does.
+2. **Write only that piece** at the end of the right file under `mymanabox-js/`, renamed per Entry 6.
+3. **Run checks:**
+   - `node -e "import('./<file>.js')"` to catch typos and missed renames.
+   - The handoff's **Check** for that piece, rewritten with the new names, compared against the expected output the handoff gives.
+   - `npm test` once Step 8 has started.
+4. **Verify the data** for pieces that talk to Scryfall (Steps 4, 5 and 7, and all of Step 9). Run the command and compare it with the matching Scryfall URL from the "Where the verify the data step applies" table in `prompt_log.md`. Tell me which fields you compared and whether they match.
+5. **Show me the diff** (`git diff`) and explain every new line in plain JavaScript terms, as for someone learning. Include anything I'd find surprising, such as why `getKey` can't use `??`.
+6. **Stop and wait for my "approve".** If I ask a question, answer it before doing anything else.
+7. **After I approve:** commit that piece alone, using the commit message from the Entry 6 "Commit messages" table plus the piece number (for example `Add utils.js getKey (Step 1.4)`). After the last piece of each Step (1.7, 2.3, 3.4, 4.7, 5.5, 6.9, 7.8, 8.5), also run `git push`.
+8. **Update `prompt_log.md`** with a new entry for every prompt I give you: my words verbatim, what you did, the check results, the data verification, and the commit hash.
+
+## 4. Do this first (before Step 1.4)
+
+1. Read all three files. Then run `git status`, `git log --oneline` and `node --version`.
+2. Confirm the repo matches the evaluation: commits `17053d3`, `5afd8fc` and `c4fcf0c`; `mymanabox-js/utils.js` has `streams`, `print`, `timer`, `InvalidValueError` and `CliExit`; Node is 20 or newer. Tell me about any difference.
+3. Update the repo's `prompt_log.md`:
+   - Copy in **Entry 9** (the GitHub evaluation) from the uploaded `prompt_log.md`.
+   - Add a new entry for this prompt.
+   - In that new entry, add a correction note: Entries 7 and 8 said "No commit yet", but Steps 1.1–1.2 were committed in `5afd8fc` and Step 1.3 in `c4fcf0c`. Don't edit the old entries.
+4. Commit the log update (`Update prompt_log.md: evaluation entry and correction`), then stop and wait for my "approve" to start Step 1.4.
+
+## 5. The remaining pieces, in order (45)
+
+- **Step 1 `utils.js`:** 1.4 `getKey`, 1.5 `capitalize`, 1.6 `toNumber`, 1.7 `formatFixed`
+- **Step 2 `http.js`:** 2.1 error classes, 2.2 the response object, 2.3 `http.get` and the exported `http` object
+- **Step 3 `cliParser.js`:** 3.1 helpers, 3.2 commands, 3.3 the `CliParser` class (help and errors), 3.4 `parseArgs`
+- **Step 4 `apiClient.js`:** 4.1 header, imports and constants, 4.2 `CardNotFoundError`, 4.3 `buildHeaders`, 4.4–4.6 `fetchCardByName` in three parts, 4.7 `searchCards`
+- **Step 5 `cardData.js`:** 5.1 header and imports, 5.2 `extractCardSummary`, 5.3 `getPrice`, 5.4 `getLegality`, 5.5 `compareCards`
+- **Step 6 `display.js`:** 6.1 header and constants, 6.2 price formatting, 6.3 field formatting, 6.4 P/T formatting, 6.5 text wrapping, 6.6 card detail, 6.7 comparison, 6.8 card list, 6.9 error printing
+- **Step 7 `main.js`:** 7.1 header and imports, 7.2 input validation, 7.3 lookup, 7.4 compare, 7.5 search, 7.6 the parser (help examples say `node main.js`), 7.7 `main`, 7.8 run-when-executed-directly and exit codes
+- **Step 8 tests:** 8.1 helpers, 8.2 apiClient tests, 8.3 cardData tests, 8.4 display tests, 8.5 main tests. Done when `npm test` shows `# pass 38` and `# fail 0`.
+- **Step 9 live verification:** run the README commands with `node main.js` (`lookup "lightning bolt"`, `lookup "sol ring"`, `compare "black lotus" "mox pearl"`, `search "t:goblin c:r"`, `lookup "jace"`, `lookup "zzzzzzzz"`) and compare each result with the Scryfall URLs. Expected exit codes: 0, 0, 0, 0, 1, 1. Also run `node main.js --help`, `node main.js` (exit 2) and `node main.js lookup "   "` (exit 1).
+
+## 6. When to stop
+
+Stop immediately and tell me the roadblock when:
+- a check's output doesn't match the expected output,
+- a rename is ambiguous or not covered by the Entry 6 table,
+- a test fails,
+- live Scryfall data doesn't match what the program printed,
+- you'd need to write anything the handoff doesn't contain.
+
+Don't fix things outside the current piece without asking me.
+
+## 7. At the end: comprehensive summary
+
+When I say "summary", or when Step 9 is done, write `BUILD_SUMMARY.md` in the repo root. Show it to me, commit it, push it, and log it in `prompt_log.md`. It must contain:
+
+1. **What was accomplished:** every piece completed this session (step number, file, what it does) with its commit hash, and the overall progress (X of 50 pieces, plus Step 9 status).
+2. **Current state of each file:** `utils.js`, `http.js`, `cliParser.js`, `apiClient.js`, `cardData.js`, `display.js`, `main.js` and `tests/`. For each one: complete, partial (which pieces), or not started.
+3. **Test results:** the last `npm test` totals, and any failures with their cause.
+4. **Data verification:** each command run against live Scryfall, the URL compared, the fields checked, and the result.
+5. **Deviations from the handoff and why:** the renames, the millisecond sleep, the dropped `AttributeError`, and anything else.
+6. **Problems found and how they were resolved,** plus anything still open.
+7. **Recommended next steps,** in order: the exact next piece to build, any fixes, and anything I should review or decide.
+8. **What I learned:** a short list of the JavaScript concepts that came up (for example rest parameters, Promises and `await`, custom error classes, `Object.hasOwn`, `padEnd`, ES modules, `node:test` mocks), each with one plain sentence.
+````
+
+### What Claude Code did
+
+1. Read the three files Mausi gave: the handoff, the uploaded `prompt_log.md` (Entries 1–9) and `build_evaluation_2026-10-12.md`.
+2. Ran `git status` (clean, up to date with `origin/main`), `git log --oneline` and `node --version` (`v26.0.0`).
+3. Confirmed the repo matches the evaluation:
+   - Commits `17053d3`, `5afd8fc` and `c4fcf0c` are all there, on top of `983a8d7` (Initial commit). No other commits.
+   - `mymanabox-js/utils.js` exports exactly `streams`, `print`, `timer`, `InvalidValueError` and `CliExit`, and imports with no errors.
+   - Node `v26.0.0` (20 or newer).
+   - No differences found.
+4. Copied Entry 9 into this log, word for word from the uploaded copy, and added this entry.
+5. Committed the log update as `Update prompt_log.md: evaluation entry and correction`. Its hash is recorded in the next entry, because a commit can't contain its own hash.
+6. Stopped to wait for Mausi's "approve" before Step 1.4.
+
+### Correction to Entries 7 and 8
+
+Entries 7 and 8 said "No commit yet (Step 1 commits after 1.7)". That's out of date. Mausi committed Steps 1.1 and 1.2 in `5afd8fc` and Step 1.3 in `c4fcf0c`. The old entries are left unchanged.
+
+### Decisions
+
+| Decision | Choice | Reason |
+|---|---|---|
+| Which file wins | Mausi's prompt, then the Entry 6 rename plan, then the handoff | Mausi's prompt, section 1. |
+| Commits | One commit per piece after "approve", message from the Entry 6 table plus the step number | Mausi's prompt, section 3.7. |
+| Push | `git push` after the last piece of each Step (1.7, 2.3, 3.4, 4.7, 5.5, 6.9, 7.8, 8.5) | Mausi's prompt, section 3.7. |
+
+---
