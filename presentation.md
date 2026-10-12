@@ -1,10 +1,10 @@
 # MyManaBox: An App That Uses an API
 
-**Next Chapter, Week 4 Build Day**, presented by Mausi
+**Next Chapter, Week 4 Day 5: Demo Day**, presented by Mausi
 
 - **Live demo:** https://miasmith81.github.io/next_chapter_week_4_build_day_an_app_that_uses_an_api/
 - **Repository:** https://github.com/miasmith81/next_chapter_week_4_build_day_an_app_that_uses_an_api
-- **Prompt Log:** [prompt_log.md](prompt_log.md), 14 entries
+- **Prompt Log:** [prompt_log.md](prompt_log.md)
 
 ---
 
@@ -14,55 +14,80 @@ MyManaBox lets you look up, search and compare Magic: The Gathering cards using 
 
 ---
 
-## 2. Rubric checklist
+## 2. Your 2-minute demo (Demo Day format)
 
-These requirements come from the assignment's three goals at the top of the README and from the program's "Build Day: The Controlled Build" guide (its four graded constraints and its end-of-day check).
+### 1. What it does and which API (20 seconds)
 
-| Requirement | Status | Evidence |
-|---|---|---|
-| **Build an app that uses an API** | ✅ | Every card comes from `https://api.scryfall.com`. `mymanabox-js/apiClient.js` makes the requests for both the CLI and the web app. |
-| **Build with Claude / Claude Code under control** | ✅ | Every piece followed the loop "ask, review the diff, accept, test, verify the data, commit". The loop is written down in prompt_log Entry 2. |
-| **Review every diff and commit each working piece** | ✅ | 50 one-piece commits for the CLI (BUILD_SUMMARY.md, section 1), then 10 commits for the web app (Web UI 1 to 10). `git log -p` shows them one at a time. |
-| **Handle the error case** | ✅ | Blank input, unknown card, ambiguous name, empty search, no internet, timeout and server errors each print a clear message. See section 5 below. |
-| **Push to GitHub** | ✅ | Everything is on `main` and is live on GitHub Pages. |
-| **Stay in scope** | ✅ | The CLI has exactly three commands (lookup, compare, search) and no extra features. Search pagination was deliberately left as a `TODO`. The web app was a separate, logged request (Entry 12). |
-| **Explain every part** | ✅ | Section 4 below has one plain-language line per file. Each piece has short comments in the code. |
-| **Log every prompt as you go** | ✅ | prompt_log.md has Entries 1 to 14, each quoting the prompt word for word with what was done, checks and commits. |
-| **Catch at least one mistake** | ✅ | Five mistakes were caught and fixed. See section 6 below. |
-| **Tested, including edge cases** | ✅ | `npm test` runs 44 tests and all pass, with no internet needed. Live checks against Scryfall matched the API data (BUILD_SUMMARY.md, section 4). |
-| **Demo ready** | ✅ | See the two-minute demo script in section 3. |
+> "MyManaBox pulls **Magic: The Gathering card data and images** from the **Scryfall API** and shows **card details, prices, legality and side-by-side comparisons**, in the terminal and in a web app."
 
----
+### 2. Run it live (40 seconds)
 
-## 3. Two-minute demo script
-
-**0:00 to 0:20, the pitch.** "MyManaBox looks up Magic cards using the Scryfall API. I first built it as a Python command-line tool, then rebuilt it piece by piece in JavaScript with Claude Code, and finally added a web app."
-
-**0:20 to 0:50, the command line.** Run these in the terminal from the `mymanabox-js` folder:
+In the terminal, from the `mymanabox-js` folder:
 
 ```bash
-node main.js lookup "lightning bolt"
-node main.js compare "black lotus" "mox pearl"
-node main.js lookup "bolt"
+node main.js lookup "lightning bolt"     # real data: {R}, Instant, current price
+node main.js lookup "bolt"               # the error case
 ```
 
-The last one shows the error case: `Error: "bolt" matched several cards. Try a more specific name ...`
+The second command prints: `Error: "bolt" matched several cards. Try a more specific name ...`
 
-**0:50 to 1:40, the web app.** Open the live demo link.
+Then open the live web app and search `t:dragon r:mythic`. Open a card to show its real price and legality, and hover to show the foil shine.
 
-1. Search `t:dragon r:mythic` and sort by price. Hover over a card to show the tilt and foil shine.
-2. Open a card to show its price, mana symbols and format legality.
-3. Look up `delver of secrets` and press **Flip** to turn the double-faced card over.
-4. Add two cards with **＋** and press **Compare**. Rows that differ light up, and the cheaper card gets a "Lower price" badge.
-5. Search `zzzzzzzz` to show the friendly "No card found" message.
+### 3. The control moment (45 seconds)
 
-**1:40 to 2:00, the process.** Open prompt_log.md and the commit history. "Every prompt is logged, and every piece was reviewed, tested and committed on its own. Here is a mistake the AI made and how I caught it." Point to section 6.
+**The change the agent made.** Open `mymanabox-js/main.js` at `cmdLookup` (commit `598657f`, Step 7.3). See section 6 below for the code.
+
+> "This is the lookup command the agent wrote. First it checks that the name isn't blank, and if it is, it stops **before** sending any request to Scryfall. Then it asks Scryfall for the card inside a `try`. If Scryfall says 404, the `catch` uses `instanceof CardNotFoundError` to tell 'no such card' apart from 'matched several cards', so the user gets the right message. Network problems get a plain-language message, and the function returns 1 so the terminal knows it failed. I accepted it because I read the diff, ran it with a real card, a blank name, `zzzzzzzz` and `bolt`, and compared the output with Scryfall's JSON."
+
+**One thing the agent got wrong.**
+
+> "When the agent added the `npm run web` command to `package.json`, it also deleted the `version` and `description` lines, which I never asked for. I caught it by reviewing the diff against the original file, and I had them put back in a separate, logged commit (prompt_log Entry 13)."
+
+### 4. One thing I'd add next (15 seconds)
+
+> "Search only shows the first page of results, up to 175 cards. There's already a `TODO` in `searchCards` for it, so next I'd add pagination to load the rest."
+
+**Two questions after.** Honest answers win. "Let me open the code and check" is a strong move, and section 6 has a one-line answer for every file.
 
 **Backup plan if the Wi‑Fi blocks GitHub Pages:** `cd mymanabox-js`, then `npm run web`, then open http://localhost:5173/web/.
 
 ---
 
-## 4. How it is built: every part explained
+## 3. Self-check against the rubric
+
+| Rubric line | Status | Evidence |
+|---|---|---|
+| **Meets the spec:** calls an API | ✅ | Every card comes from `https://api.scryfall.com`. `mymanabox-js/apiClient.js` makes the requests for both the CLI and the web app. |
+| **Meets the spec:** handles errors | ✅ | Blank input, unknown card, ambiguous name, empty search, no internet, timeout and server errors each print a clear message (section 7). |
+| **Meets the spec:** on GitHub | ✅ | Everything is on `main`, and the web app is live on GitHub Pages. |
+| **Build skill:** it runs and shows real data, verified | ✅ | CLI output was compared field by field with Scryfall's JSON (BUILD_SUMMARY.md, section 4). The live site was checked in Chrome on 2026-10-12. |
+| **Control:** reviewed diffs, small commits | ✅ | Each piece followed "ask, review the diff, accept, test, verify the data, commit" (prompt_log Entry 2). `main` has 64 commits, and most add one piece: 46 "Step" commits for the CLI and 11 "Web UI" commits. |
+| **Control:** Prompt Log complete | ✅ | prompt_log.md has an entry for every prompt, each quoting it word for word. |
+| **Control:** caught a mistake | ✅ | Five mistakes were caught and fixed (section 8). |
+| **Control:** can explain any part | ✅ | Section 6 has one plain-language line per file. |
+| **Demo:** run it and explain one agent change in 2 minutes | ✅ | The script above. |
+
+---
+
+## 4. Submission (LMS, by end of day)
+
+- **GitHub repo:** https://github.com/miasmith81/next_chapter_week_4_build_day_an_app_that_uses_an_api
+- **Prompt Log:** https://github.com/miasmith81/next_chapter_week_4_build_day_an_app_that_uses_an_api/blob/main/prompt_log.md
+- **One line:** I'll explain the agent's `cmdLookup` in `main.js`, which rejects a blank name before any request and uses `instanceof CardNotFoundError` to tell "no card found" from "matched several cards". The mistake I caught: when the agent added `npm run web` to `package.json`, it also deleted the `version` and `description` lines, and I spotted it in the diff and had them restored.
+
+---
+
+## 5. Standup and retro notes (your words, edit before class)
+
+- **Standup:** finished the JavaScript CLI and a web app on GitHub Pages; nothing left; proud of catching the agent's mistakes by reviewing every diff.
+- **Coding agent vs chat AI:** answer in your own words.
+- **Best control moment:** the `package.json` diff, or stopping the build when Node 26's new test output couldn't be read, instead of committing blindly.
+- **Still fuzzy:** answer in your own words.
+- **One thing I can do now that I couldn't Monday:** answer in your own words.
+
+---
+
+## 6. How it is built: every part explained
 
 The app is split so each file has one job. The web app reuses the CLI's files without changing them.
 
@@ -124,7 +149,7 @@ export async function cmdLookup(args) {
 
 ---
 
-## 5. Error cases (live output)
+## 7. Error cases (live output)
 
 These were run against live Scryfall on 2026-10-12.
 
@@ -155,7 +180,7 @@ The web app shows the same messages in a red notice box, using the same wording 
 
 ---
 
-## 6. Mistakes caught and fixed
+## 8. Mistakes caught and fixed
 
 | # | What went wrong | How it was caught | The fix |
 |---|---|---|---|
@@ -167,7 +192,7 @@ The web app shows the same messages in a red notice box, using the same wording 
 
 ---
 
-## 7. Testing
+## 9. Testing
 
 - `cd mymanabox-js && npm test` gives **44 tests, 44 pass, 0 fail**.
 - **Unit tests** cover the request shape, 404 handling, error messages, data clean-up, every print function, the command parser and the web helpers.
@@ -176,10 +201,10 @@ The web app shows the same messages in a red notice box, using the same wording 
 
 ---
 
-## 8. What I learned
+## 10. What I learned
 
 - **Splitting the work into one-job files** (fetch, clean up, print) made each piece small enough to review and test on its own.
 - **Real API data is messy.** Some cards have no price, some have two faces, and names can match many cards, so every field needs a fallback.
 - **`async` / `await` and `fetch`** for calling an API, and **custom error classes** with `instanceof` for telling failures apart.
 - **Testing with a fake API** keeps tests fast and repeatable, while a separate live check proves the real data matches.
-- **Staying in control of AI:** read every diff, test it, verify the data, then commit. The AI made real mistakes (section 6), and this loop is how they were caught.
+- **Staying in control of AI:** read every diff, test it, verify the data, then commit. The AI made real mistakes (section 8), and this loop is how they were caught.

@@ -619,3 +619,28 @@ Ensure all project assignment rubrics are being met with this assignment. Adjust
 - Live CLI output on the Mac matched what presentation.md shows (for example, `lookup "bolt"` exits 1 with the "matched several cards" message).
 
 ---
+
+## Entry 15: 2026-10-12 — Match presentation.md to the Demo Day rubric
+
+### Prompt (verbatim)
+
+````text
+This is the demo day application submission
+[Dashboard](https://nextchapterproject.atlaslearn.org/dashboard)/Week 4 · Day 5
+Demo Day — Show Your API App
+(The rest of the message was the full Week 4 Day 5 page, pasted from the course site: learning objectives, the 2-minute demo format, the rubric self-check, the submission list, and the Fireside Chat and retro questions.)
+````
+
+### What was done
+
+1. Rebuilt the top of presentation.md around the Demo Day page:
+   - the four-part 2-minute demo (20 s what it does and which API, 40 s run it live, 45 s the control moment, 15 s what's next) with a script for each part;
+   - the control moment: the agent's `cmdLookup` in `main.js` (commit `598657f`, Step 7.3), what it does and why it was accepted, plus the `package.json` mistake caught in the diff;
+   - what's next: search pagination (the `TODO` in `searchCards`).
+2. Replaced the checklist with the Demo Day rubric lines (meets the spec, build skill, control, demo), each with evidence.
+3. Added the LMS submission: repo link, Prompt Log link, and the one-line "change I'll explain + mistake I caught".
+4. Added standup and retro prompts, left for Mausi to answer in their own words.
+5. Corrected the commit count to what `main` actually has: 64 commits, including 46 "Step" commits and 11 "Web UI" commits.
+6. No app code was changed.
+
+---
