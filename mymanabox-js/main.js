@@ -67,3 +67,37 @@ export async function cmdLookup(args) {
     throw exc;
   }
 }
+
+/** Fetch two cards by name and print them side by side. Returns the exit code. */
+export async function cmdCompare(args) {
+  const [nameA, nameB] = [args.name_a, args.name_b];
+  if (!validateNonEmpty(nameA, "First card name")) {
+    return 1;
+  }
+  if (!validateNonEmpty(nameB, "Second card name")) {
+    return 1;
+  }
+
+  try {
+    // One after the other (not Promise.all) so the 100 ms rate-limit pause holds.
+    const cardA = await fetchCardByName(nameA);
+    const cardB = await fetchCardByName(nameB);
+    const comparison = compareCards(cardA, cardB);
+    display.printComparison(comparison);
+    return 0;
+  } catch (exc) {
+    if (exc instanceof CardNotFoundError) {
+      if (exc.ambiguous) {
+        display.printError("One of those names matched several cards. Be more specific.");
+      } else {
+        display.printError("One or both cards were not found.");
+      }
+      return 1;
+    }
+    if (exc instanceof http.errors.RequestError) {
+      display.printError(exc.message);
+      return 1;
+    }
+    throw exc;
+  }
+}
