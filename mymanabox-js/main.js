@@ -125,3 +125,39 @@ export async function cmdSearch(args) {
     throw exc;
   }
 }
+
+/** Build and return the command-line parser. */
+export function buildParser() {
+  const parser = new CliParser({
+    prog: "mymanabox",
+    description: "MyManaBox: Magic: The Gathering card lookup via Scryfall",
+    epilog:
+      "Examples:\n" +
+      '  node main.js lookup "lightning bolt"\n' +
+      '  node main.js compare "black lotus" "mox pearl"\n' +
+      '  node main.js search "t:goblin c:r"\n',
+  });
+  // The chosen command is stored as args.command; help shows it as <command>.
+  const commands = parser.addCommands({ dest: "command", metavar: "<command>" });
+  commands.required = true; // running with no command is a usage error (exit 2)
+
+  const lookupParser = commands.addCommand("lookup", {
+    help: "Look up a card by name (fuzzy matching supported)",
+  });
+  lookupParser.addArgument("name", { help: 'Card name, e.g. "lightning bolt"' });
+
+  const compareParser = commands.addCommand("compare", {
+    help: "Compare two cards side by side",
+  });
+  compareParser.addArgument("name_a", { help: "First card name" });
+  compareParser.addArgument("name_b", { help: "Second card name" });
+
+  const searchParser = commands.addCommand("search", {
+    help: "Search cards using Scryfall syntax",
+  });
+  searchParser.addArgument("query", {
+    help: 'Scryfall query, e.g. "t:goblin c:r" or "set:lea"',
+  });
+
+  return parser;
+}
