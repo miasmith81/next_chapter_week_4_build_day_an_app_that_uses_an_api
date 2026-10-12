@@ -183,3 +183,12 @@ export function printCardList(cards) {
 
   print(`\n  ${cards.length} result(s) returned.\n`);
 }
+
+/**
+ * Print a user-facing error in one consistent style.
+ *
+ * @param {string} message Plain-language error description, never a stack trace.
+ */
+export function printError(message) {
+  print(`\n  Error: ${message}\n`);
+}
