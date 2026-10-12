@@ -749,20 +749,28 @@ select {
   align-items: start;
 }
 
-/* Blurred artwork glowing behind the page */
+/* Blurred artwork glowing behind the page.
+   The frame stays inside the screen (so phones never scroll sideways) and
+   clips the art, which reaches past the frame so the blur has no hard edges. */
 .backdrop {
   position: fixed;
-  inset: 0 0 auto; /* no negative offsets: they would make phones scroll sideways */
+  inset: 0 0 auto;
   height: 80vh;
   z-index: -1;
-  background-size: cover;
-  background-position: center 30%;
-  filter: blur(70px) saturate(140%);
+  overflow: hidden;
   opacity: 0.32;
   mask-image: linear-gradient(to bottom, #000 30%, transparent);
   -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent);
   animation: fade-in 1.2s var(--ease-out) both;
   pointer-events: none;
+}
+
+.backdrop-art {
+  position: absolute;
+  inset: -15%;
+  background-size: cover;
+  background-position: center 30%;
+  filter: blur(70px) saturate(140%);
 }
 
 .detail-media {

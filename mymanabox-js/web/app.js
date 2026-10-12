@@ -576,7 +576,9 @@ function cardDetail(card) {
 
   // A soft, blurred copy of the artwork fills the background behind the page.
   const art = cardImage(card, "art_crop");
-  const backdrop = art ? h("div", { class: "backdrop", style: { backgroundImage: `url("${art}")` }, "aria-hidden": "true" }) : null;
+  const backdrop = art
+    ? h("div", { class: "backdrop", "aria-hidden": "true" }, h("div", { class: "backdrop-art", style: { backgroundImage: `url("${art}")` } }))
+    : null;
 
   return h(
     "article",
@@ -785,10 +787,14 @@ function navigate() {
     showRoute();
     return;
   }
-  document.startViewTransition(async () => {
+  const transition = document.startViewTransition(async () => {
     // Wait (briefly) for cached content so the picture can morph into place.
     await Promise.race([showRoute(), new Promise((resolve) => setTimeout(resolve, 250))]);
   });
+  // A quick second click skips the running animation; that is fine, so ignore it.
+  for (const step of [transition.ready, transition.finished, transition.updateCallbackDone]) {
+    step.catch(() => {});
+  }
 }
 
 window.addEventListener("hashchange", navigate);
