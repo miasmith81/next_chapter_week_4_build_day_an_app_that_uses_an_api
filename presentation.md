@@ -220,7 +220,7 @@ const userAgent = globalThis.process?.env.SCRYFALL_USER_AGENT || USER_AGENT;
 
 ```bash
 cat .env.example            # the committed template, with no real values
-git check-ignore -v .env    # proves Git ignores .env: ".gitignore:2:.env  .env"
+git check-ignore -v .env    # proves Git ignores it: "mymanabox-js/.gitignore:2:.env  .env"
 git status                  # .env does not appear
 ```
 
