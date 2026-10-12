@@ -38,3 +38,23 @@ export class CardNotFoundError extends Error {
 export function buildHeaders() {
   return { "User-Agent": USER_AGENT, Accept: "application/json" };
 }
+
+/**
+ * Fetch one card by name using Scryfall's fuzzy matching.
+ *
+ * @param {string} name Card name; small misspellings are fine.
+ * @returns {Promise<object>} The raw Scryfall card object.
+ * @throws {CardNotFoundError} On 404 (no match or an ambiguous match).
+ * @throws {http.errors.RequestTimeoutError} When Scryfall does not answer in time.
+ * @throws {http.errors.ConnectionError} When Scryfall cannot be reached.
+ * @throws {http.errors.HttpError} On other 4xx and 5xx responses.
+ * @throws {http.errors.RequestError} On any other network failure.
+ */
+export async function fetchCardByName(name) {
+  await timer.sleep(100); // 100 ms pause: respects Scryfall's rate limit
+  try {
+    const response = await http.get(`${BASE_URL}/cards/named`, {
+      params: { fuzzy: name },
+      headers: buildHeaders(),
+      timeout: TIMEOUT,
+    });
