@@ -446,3 +446,70 @@ Entries 7 and 8 said "No commit yet (Step 1 commits after 1.7)". That's out of d
 | Push | `git push` after the last piece of each Step (1.7, 2.3, 3.4, 4.7, 5.5, 6.9, 7.8, 8.5) | Mausi's prompt, section 3.7. |
 
 ---
+
+## Entry 11: 2026-10-12 — Automated build of Steps 1.4–8.5 and Step 9 live check
+
+### Prompt (verbatim)
+
+````text
+Automatethis process utilizing desktop commander and complete the planned tasks together with VS COde and Claude Code. Think step by step for complex problems. Do not start any new tasks until 100% completion of this task. Use the screen space i have provided to utilize all tools you require to complete this task. Use best practices and add meaningful comments where applicable.
+````
+
+### What was done
+
+1. Treated this prompt as the "approve" for Step 1.4 and for every remaining piece.
+2. Wrote the 44 remaining pieces (1.5–8.5) in JavaScript only, with the Entry 6 names and a short comment on each part.
+   - Printed text, Scryfall keys (`price_usd`, `set_name`, ...), the CLI argument names and the `node main.js` help lines were kept exactly.
+3. Before touching this repo, built the whole app in a scratch copy:
+   - Every piece passed its check.
+   - `npm test` gave 38 of 38.
+   - On 43 command lines against a fake Scryfall server, the output, errors and exit codes matched the original program.
+4. Copied the pieces and a small Node script (`apply.mjs`) to this Mac with Desktop Commander and checked their checksums. For each piece the script:
+   - appends it to the right file;
+   - runs `node --check` and `node -e "import('./file.js')"`, or `node --test` for test files;
+   - commits that piece alone with the Entry 6 message;
+   - runs `git push` after 1.7, 2.3, 3.4, 4.7, 5.5, 6.9, 7.8 and 8.5.
+5. One hiccup: Node 26 prints test results in a new format by default, so the script couldn't read the counts after Step 8.2.
+   - Nothing was committed for 8.2 at that point.
+   - The script was changed to ask for the TAP format and to skip pieces already committed. On the rerun, 8.2–8.5 went through.
+6. Ran Step 9 against live Scryfall (see BUILD_SUMMARY.md, section 4).
+
+### Commits
+
+| Step | Hash | | Step | Hash |
+|---|---|---|---|---|
+| 1.4 | `e6e3792` | | 5.3 | `816941c` |
+| 1.5 | `7e206b8` | | 5.4 | `ee0c81c` |
+| 1.6 | `d601bd8` | | 5.5 | `0cbf00d` (pushed) |
+| 1.7 | `508c8cb` (pushed) | | 6.1 | `9d64fe6` |
+| 2.1 | `c193e19` | | 6.2 | `97566c2` |
+| 2.2 | `da0c913` | | 6.3 | `9e2ad51` |
+| 2.3 | `8a595bb` (pushed) | | 6.4 | `0b1bbf5` |
+| 3.1 | `7b4f425` | | 6.5 | `5aafda5` |
+| 3.2 | `6ddf952` | | 6.6 | `998fb9c` |
+| 3.3 | `7a3337c` | | 6.7 | `d9b4068` |
+| 3.4 | `39c4a02` (pushed) | | 6.8 | `e06dbca` |
+| 4.1 | `e6a1026` | | 6.9 | `ad576b6` (pushed) |
+| 4.2 | `af19600` | | 7.1 | `ca3db82` |
+| 4.3 | `a191ce6` | | 7.2 | `c880001` |
+| 4.4 | `3da4a70` | | 7.3 | `598657f` |
+| 4.5 | `36859e9` | | 7.4 | `7b30838` |
+| 4.6 | `2932f63` | | 7.5 | `cc98bf1` |
+| 4.7 | `2424ae6` (pushed) | | 7.6 | `c177e79` |
+| 5.1 | `a5cfc46` | | 7.7 | `04dab9b` |
+| 5.2 | `d9cdf33` | | 7.8 | `c2a0058` (pushed) |
+| 8.1 | `2bc8ce0` | | 8.4 | `68eff7f` |
+| 8.2 | `825338b` | | 8.5 | `abf93eb` (pushed) |
+| 8.3 | `ff0f677` | | | |
+
+The previous entry's log commit is `6ccc935`.
+
+### Checks
+
+- `npm test`: `# tests 38`, `# pass 38`, `# fail 0`.
+- Step 9: all fields matched Scryfall.
+- Two results differ from what the handoff expected, and neither is a code problem:
+  - **`lookup "jace"` now exits 0, not 1.** Scryfall added a token card named exactly "Jace" (Reality Fracture Tokens, 2026-10-02), so the fuzzy match is no longer ambiguous. The program prints that card correctly.
+  - **Prices can differ by a few cents from the URL you open.** Scryfall caches `fuzzy=sol+ring` (what the program sends) separately from `fuzzy=sol%20ring`. Both return the same card, but either copy of the price can be a little out of date. Compare against the `+` URL.
+
+---
