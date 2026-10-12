@@ -537,7 +537,7 @@ Alos, I want this deployed to a GitHub page for easy demonstration to the class 
 3. Added `npm run web` (a small static server on port 5173) for running it locally.
 4. Added a root `index.html` and `.nojekyll` so GitHub Pages opens the app.
 5. Tested in Chromium with a fake Scryfall, then in Chrome on the Mac with live Scryfall.
-   - Fixed: search results going blank after going back, the sort menu showing with no results, the compare tray covering the compare page, sideways scrolling on phones, and "Transition was skipped" errors on quick clicks.
+   - Fixed: search results going blank after going back, the sort menu showing with no results, the compare tray covering the compare page, sideways scrolling on phones, "Transition was skipped" errors on quick clicks, and the blurred card art being boxed into the middle of the screen.
 6. `web-ui` was merged into `main` through pull request #1 (merge commit `3260f6b`), then GitHub Pages was turned on (branch `main`, folder `/`).
 
 ### Commits
@@ -551,11 +551,14 @@ Alos, I want this deployed to a GitHub page for easy demonstration to the class 
 | Web UI 5: `web/app.js` | `87901d6` |
 | Web UI 6: GitHub Pages entry page | `5b57f61` |
 | Web UI 7: transition errors, backdrop edges | `66b88d9` |
+| Web UI 8: README section and this entry | `263c346` |
+| Web UI 9: backdrop fills the whole screen | `e64f06a` |
 
 ### Checks
 
 - `npm test`: `# pass 44`, `# fail 0`.
 - Live Scryfall in Chrome: `t:dragon r:mythic` gave "122 result(s) returned."; `bolt` showed the "matched several cards" message; `zzzzzzzz` showed `No card found for "zzzzzzzz".`; no sideways scrolling at phone width.
-- Live site: https://miasmith81.github.io/next_chapter_week_4_build_day_an_app_that_uses_an_api/
+- Live site, checked in Chrome after Web UI 9: the root link opens `mymanabox-js/web/`, search shows "122 result(s) returned.", and Sol Ring shows Legacy "Banned" and Vintage "Restricted".
+  https://miasmith81.github.io/next_chapter_week_4_build_day_an_app_that_uses_an_api/
 
 ---
