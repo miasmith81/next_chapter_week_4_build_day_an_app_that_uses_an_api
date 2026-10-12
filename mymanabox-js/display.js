@@ -151,3 +151,35 @@ export function printComparison(comparison) {
 
   print();
 }
+
+/**
+ * Print a numbered, column-aligned list of cards.
+ *
+ * Takes raw Scryfall card objects (not summaries) and shows only the
+ * fields that help when scanning a list of results.
+ *
+ * @param {object[]} cards Array of raw Scryfall card objects.
+ */
+export function printCardList(cards) {
+  if (cards.length === 0) {
+    print("\n  No cards to display.\n");
+    return;
+  }
+
+  print();
+  print(`  ${"#".padEnd(4)} ${"Name".padEnd(35)} ${"Type".padEnd(28)} ${"Rarity".padEnd(10)} ${"Price"}`);
+  print(`  ${"-".repeat(90)}`);
+
+  cards.forEach((card, index) => {
+    const number = index + 1; // lists start at 1 for people
+    // slice() cuts long text so each column keeps its width
+    const name = (getKey(card, "name") || "Unknown").slice(0, 34);
+    const typeLine = (getKey(card, "type_line") || "").slice(0, 27);
+    const rarity = capitalize(getKey(card, "rarity") || "").slice(0, 9);
+    const prices = getKey(card, "prices") || {};
+    const price = formatPrice(getKey(prices, "usd"));
+    print(`  ${String(number).padEnd(4)} ${name.padEnd(35)} ${typeLine.padEnd(28)} ${rarity.padEnd(10)} ${price}`);
+  });
+
+  print(`\n  ${cards.length} result(s) returned.\n`);
+}
