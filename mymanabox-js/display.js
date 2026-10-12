@@ -106,3 +106,48 @@ export function printCardDetail(summary) {
   print(`\n  ${"Artist".padEnd(14)} ${formatField(getKey(summary, "artist"))}`);
   print();
 }
+
+/**
+ * Print two cards in aligned side-by-side columns.
+ *
+ * @param {object} comparison { a, b } from cardData.compareCards().
+ */
+export function printComparison(comparison) {
+  const a = getKey(comparison, "a", {});
+  const b = getKey(comparison, "b", {});
+
+  const divider = `  ${"-".repeat(COLUMN_WIDTH + 3 + COLUMN_WIDTH)}`;
+  const header = `  ${"CARD A".padEnd(COLUMN_WIDTH)} | CARD B`;
+  print();
+  print(header);
+  print(divider);
+
+  // [label, data key, formatter] for each row
+  const fields = [
+    ["Name",        "name",      formatField],
+    ["Mana Cost",   "mana_cost", formatField],
+    ["Type",        "type_line", formatField],
+    ["Rarity",      "rarity",    formatField],
+    ["Set",         "set_name",  formatField],
+    ["Price (USD)", "price_usd", formatPrice],
+  ];
+
+  for (const [label, key, format] of fields) {
+    const valueA = format(getKey(a, key));
+    const valueB = format(getKey(b, key));
+    const cellA = `${label}: ${valueA}`;
+    const cellB = `${label}: ${valueB}`;
+    print(`  ${cellA.padEnd(COLUMN_WIDTH)} | ${cellB}`);
+  }
+
+  // P/T row: shown when either card has power or toughness
+  if ([a, b].some((card) => ["power", "toughness"].some((key) => Object.hasOwn(card, key)))) {
+    const ptA = formatPowerToughness(a);
+    const ptB = formatPowerToughness(b);
+    const cellA = `P/T: ${ptA}`;
+    const cellB = `P/T: ${ptB}`;
+    print(`  ${cellA.padEnd(COLUMN_WIDTH)} | ${cellB}`);
+  }
+
+  print();
+}
