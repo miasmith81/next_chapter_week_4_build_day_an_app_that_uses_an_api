@@ -33,3 +33,8 @@ export class CardNotFoundError extends Error {
     this.ambiguous = ambiguous;
   }
 }
+
+/** Return the standard request headers, including the User-Agent. */
+export function buildHeaders() {
+  return { "User-Agent": USER_AGENT, Accept: "application/json" };
+}
