@@ -101,3 +101,27 @@ export async function cmdCompare(args) {
     throw exc;
   }
 }
+
+/** Search for cards and print the result list. Returns the exit code. */
+export async function cmdSearch(args) {
+  const query = args.query;
+  if (!validateNonEmpty(query, "Search query")) {
+    return 1;
+  }
+
+  try {
+    const cards = await searchCards(query);
+    display.printCardList(cards);
+    return 0;
+  } catch (exc) {
+    if (exc instanceof CardNotFoundError) {
+      display.printError(`No cards found for query: "${query}".`);
+      return 1;
+    }
+    if (exc instanceof http.errors.RequestError) {
+      display.printError(exc.message);
+      return 1;
+    }
+    throw exc;
+  }
+}
