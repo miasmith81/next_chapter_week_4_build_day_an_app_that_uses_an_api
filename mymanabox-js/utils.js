@@ -19,3 +19,20 @@ export function print(...args) {
 export const timer = {
   sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
 };
+
+/** Thrown when a value has the right type but is not usable, e.g. toNumber("abc"). */
+export class InvalidValueError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "InvalidValueError";
+  }
+}
+
+/** Thrown by the command-line parser to end the program; main.js turns it into the exit code. */
+export class CliExit extends Error {
+  constructor(code) {
+    super(`CliExit: ${code}`);
+    this.name = "CliExit";
+    this.code = code;
+  }
+}

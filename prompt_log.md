@@ -286,3 +286,18 @@ When Claude Code tried to clone scryfall-cli onto the machine, Mausi rejected it
 4. Stopped for Mausi's review. No commit yet (Step 1 commits after 1.7).
 
 ---
+
+## Entry 8: 2026-10-12 02:17 UTC — Step 1.3 (error classes)
+
+### Prompt (Mausi)
+
+> approve
+
+### What Claude Code did
+
+1. Mausi approved Step 1.2 (`timer.sleep`).
+2. **Step 1.3:** added `InvalidValueError` and `CliExit` to the end of `mymanabox-js/utils.js`. The handoff's third class is not added: per the Entry 6 rename plan, `getKey` throws JavaScript's built-in `TypeError` instead.
+3. Check: `new InvalidValueError("bad number: abc")` has name `InvalidValueError` and that message; `new CliExit(2)` has name `CliExit` and `code` 2; both are `instanceof Error`.
+4. Stopped for Mausi's review. No commit yet (Step 1 commits after 1.7).
+
+---
