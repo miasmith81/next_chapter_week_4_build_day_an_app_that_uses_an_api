@@ -12,3 +12,39 @@
  */
 
 import { getKey, capitalize, toNumber, InvalidValueError } from "./utils.js";
+
+/**
+ * Pick the display-ready fields out of a raw Scryfall card object.
+ *
+ * Always included: name, mana_cost, cmc, type_line, rarity, set_name,
+ *                  oracle_text, artist, released_at, price_usd.
+ * Only sometimes:  power and toughness (creature cards only).
+ *
+ * @param {object} card Raw Scryfall card object.
+ * @returns {object} Flat object ready for the display layer.
+ */
+export function extractCardSummary(card) {
+  const summary = {
+    name: getKey(card, "name", "Unknown"),
+    mana_cost: getKey(card, "mana_cost", ""), // "" on Sol Ring and lands
+    cmc: getKey(card, "cmc", 0),
+    type_line: getKey(card, "type_line", "Unknown"),
+    rarity: capitalize(getKey(card, "rarity") || "unknown"),
+    set_name: getKey(card, "set_name", "Unknown"),
+    oracle_text: getKey(card, "oracle_text", ""),
+    artist: getKey(card, "artist", "Unknown"),
+    released_at: getKey(card, "released_at", "Unknown"),
+    price_usd: getPrice(card),
+  };
+
+  // power and toughness are missing on non-creatures. Don't fill in a
+  // placeholder: their absence tells the display layer to skip the P/T row.
+  // They count as one field: if only one half exists the data is broken,
+  // so leave both out rather than show half a value.
+  if (getKey(card, "power") !== null && getKey(card, "toughness") !== null) {
+    summary["power"] = card["power"];
+    summary["toughness"] = card["toughness"];
+  }
+
+  return summary;
+}
