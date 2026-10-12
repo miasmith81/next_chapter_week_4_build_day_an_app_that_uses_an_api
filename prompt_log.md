@@ -588,3 +588,34 @@ If you want me to check anything before you present, or add a prompt_log entry f
 - `npm test`: `# pass 44`, `# fail 0`.
 
 ---
+
+## Entry 14: 2026-10-12 — Rubric check and presentation.md
+
+### Prompt (verbatim)
+
+````text
+Ensure all project assignment rubrics are being met with this assignment. Adjust or enhance as needed to reach 100% target of completion. Then, put together a 'presentation.md' that highlights everything required by the assignment
+````
+
+### What was done
+
+1. Found the rubric in two places:
+   - the three Build Day goals at the top of README.md;
+   - "Build Day The Controlled Build.docx" on the Mac: its four graded constraints (stay in scope, explain every part, log every prompt, catch one mistake) and its end-of-day check.
+2. Checked each requirement against the repo, and ran the CLI against live Scryfall: lookup, compare, search, blank name, unknown card, ambiguous name, and no arguments.
+3. Filled the one gap: README.md only described the web app. It now also explains the command-line app, how to run it, a table of every error case, and how to run the tests. It also links to presentation.md and prompt_log.md.
+4. Wrote presentation.md:
+   - the rubric checklist with evidence;
+   - a two-minute demo script;
+   - one plain-language line per file;
+   - the live error output;
+   - the five mistakes that were caught;
+   - the test results and what I learned.
+5. No app code was changed.
+
+### Checks
+
+- `npm test`: `# pass 44`, `# fail 0`.
+- Live CLI output on the Mac matched what presentation.md shows (for example, `lookup "bolt"` exits 1 with the "matched several cards" message).
+
+---

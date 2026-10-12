@@ -4,6 +4,41 @@
 - Review every diff and commit each working piece 
 - Handle the error case and push to GitHub
 
+**MyManaBox** looks up Magic: The Gathering cards with the free [Scryfall API](https://scryfall.com/docs/api). It is written in JavaScript only (Node 20 or newer, no packages to install) and has two ways to use it: a command-line app and a web app.
+
+- **Presentation notes:** [presentation.md](presentation.md)
+- **Prompt Log:** [prompt_log.md](prompt_log.md) (every prompt, logged as the build happened)
+- **Build summary:** [BUILD_SUMMARY.md](BUILD_SUMMARY.md)
+
+## MyManaBox command-line app
+
+```bash
+cd mymanabox-js
+node main.js lookup "lightning bolt"            # one card
+node main.js compare "black lotus" "mox pearl"  # two cards side by side
+node main.js search "t:goblin c:r"              # Scryfall search syntax
+node main.js --help
+```
+
+### Error cases it handles
+
+| What goes wrong | What you see | Exit code |
+|---|---|---|
+| Blank name, e.g. `lookup "   "` | `Error: Card name cannot be empty.` (no request is sent) | 1 |
+| No such card, e.g. `lookup "zzzzzzzz"` | `Error: No card found for "zzzzzzzz".` | 1 |
+| Name matches several cards, e.g. `lookup "bolt"` | `Error: "bolt" matched several cards. Try a more specific name ...` | 1 |
+| Search with no results | `Error: No cards found for query: "..."` | 1 |
+| No internet, timeout, or a server error | A plain-language message instead of a crash | 1 |
+| Missing command or wrong arguments | Usage help | 2 |
+| Card has no price or no power/toughness | Shows `n/a` instead of `null` | 0 |
+
+### Tests
+
+```bash
+cd mymanabox-js
+npm test        # 44 tests, all offline (Scryfall is faked)
+```
+
 ## MyManaBox web app
 
 **Live demo:** https://miasmith81.github.io/next_chapter_week_4_build_day_an_app_that_uses_an_api/
