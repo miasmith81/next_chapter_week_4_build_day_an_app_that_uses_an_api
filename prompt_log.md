@@ -513,3 +513,49 @@ The previous entry's log commit is `6ccc935`.
   - **Prices can differ by a few cents from the URL you open.** Scryfall caches `fuzzy=sol+ring` (what the program sends) separately from `fuzzy=sol%20ring`. Both return the same card, but either copy of the price can be a little out of date. Compare against the `+` URL.
 
 ---
+
+## Entry 12: 2026-10-12 — Web UI and GitHub Pages
+
+### Prompts (verbatim)
+
+````text
+Next steps are to build a professional, polished user interface with premium micro-interactions and scryfall graphics that resemble a professional Moxfield or Manabox page
+````
+
+````text
+Alos, I want this deployed to a GitHub page for easy demonstration to the class when I present in the morning.
+````
+
+### What was done
+
+1. Built a browser front end in `mymanabox-js/web/`, JavaScript, HTML and CSS only, with no new packages.
+   - It reuses the CLI modules unchanged: `fetchCardByName` and `searchCards` from `apiClient.js`, `formatPrice` and `formatField` from `display.js`, `getLegality` from `cardData.js`.
+   - Three views: Search (with sorting), Card (image, mana symbols, prices, legality, 3D flip for double-faced cards) and Compare.
+   - Micro-interactions: pointer tilt with a foil shine, skeleton loading, staggered tiles, View Transitions between pages, toasts and a compare tray.
+   - All Scryfall text is added as text nodes, never as HTML.
+2. Added `web/cardView.js` for the pure helpers and `tests/cardView.test.js` with 6 tests.
+3. Added `npm run web` (a small static server on port 5173) for running it locally.
+4. Added a root `index.html` and `.nojekyll` so GitHub Pages opens the app.
+5. Tested in Chromium with a fake Scryfall, then in Chrome on the Mac with live Scryfall.
+   - Fixed: search results going blank after going back, the sort menu showing with no results, the compare tray covering the compare page, sideways scrolling on phones, and "Transition was skipped" errors on quick clicks.
+6. `web-ui` was merged into `main` through pull request #1 (merge commit `3260f6b`), then GitHub Pages was turned on (branch `main`, folder `/`).
+
+### Commits
+
+| Piece | Hash |
+|---|---|
+| Web UI 1: `web/server.js`, `npm run web` | `e66d0c2` |
+| Web UI 2: `web/cardView.js` and tests | `09f6483` |
+| Web UI 3: `web/index.html`, favicon | `83dedf7` |
+| Web UI 4: `web/styles.css` | `bcba7c9` |
+| Web UI 5: `web/app.js` | `87901d6` |
+| Web UI 6: GitHub Pages entry page | `5b57f61` |
+| Web UI 7: transition errors, backdrop edges | `66b88d9` |
+
+### Checks
+
+- `npm test`: `# pass 44`, `# fail 0`.
+- Live Scryfall in Chrome: `t:dragon r:mythic` gave "122 result(s) returned."; `bolt` showed the "matched several cards" message; `zzzzzzzz` showed `No card found for "zzzzzzzz".`; no sideways scrolling at phone width.
+- Live site: https://miasmith81.github.io/next_chapter_week_4_build_day_an_app_that_uses_an_api/
+
+---
