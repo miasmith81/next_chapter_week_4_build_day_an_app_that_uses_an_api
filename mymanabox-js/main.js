@@ -161,3 +161,29 @@ export function buildParser() {
 
   return parser;
 }
+
+/**
+ * Parse the arguments and run the matching command.
+ *
+ * Returns 0 on success and 1 on any error. The exit code reaches the shell,
+ * so scripts can detect failures without reading the output.
+ */
+export async function main() {
+  const parser = buildParser();
+  const args = parser.parseArgs();
+
+  // Command name -> the function that handles it
+  const handlers = {
+    lookup: cmdLookup,
+    compare: cmdCompare,
+    search: cmdSearch,
+  };
+
+  const handler = getKey(handlers, args.command);
+  if (handler === null) {
+    parser.printHelp();
+    return 1;
+  }
+
+  return await handler(args);
+}
