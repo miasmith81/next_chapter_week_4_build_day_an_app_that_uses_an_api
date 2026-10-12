@@ -562,3 +562,29 @@ Alos, I want this deployed to a GitHub page for easy demonstration to the class 
   https://miasmith81.github.io/next_chapter_week_4_build_day_an_app_that_uses_an_api/
 
 ---
+
+## Entry 13: 2026-10-12 — Restore package.json version and description
+
+### Prompt (verbatim)
+
+````text
+Noted: the web UI is done and live on GitHub Pages (prompt_log Entry 12). I won't redo or change any of it.
+
+Your local copy is up to date with GitHub at `6cd02b4` ("Log Web UI 8 and 9 in Entry 12"), with nothing uncommitted. The `mymanabox-js/web/` folder has `app.js`, `cardView.js`, `favicon.svg`, `index.html`, `server.js` and `styles.css`.
+
+One small thing: when `npm run web` was added to `mymanabox-js/package.json` (`e66d0c2`), the `version` and `description` lines from Step 0.1 were removed. The app and `npm test` don't need them, so it's safe for your demo. I can put them back if you want it to match the handoff exactly.
+
+If you want me to check anything before you present, or add a prompt_log entry for this message, just ask. Good luck with the presentation tomorrow morning.
+````
+
+### What was done
+
+1. Put back the `"version": "1.0.0"` and `"description"` lines from Step 0.1 that Web UI 1 (`e66d0c2`) removed by mistake.
+2. Kept the `scripts` block in its Step 0.1 layout and added the `"web"` line inside it.
+   - Compared with Step 0.1 (`0223a74`), the only change in `package.json` is the new `"web": "node web/server.js"` line.
+
+### Checks
+
+- `npm test`: `# pass 44`, `# fail 0`.
+
+---
