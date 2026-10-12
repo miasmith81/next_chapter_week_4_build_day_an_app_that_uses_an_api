@@ -75,3 +75,38 @@ class Response {
     }
   }
 }
+
+/**
+ * GET a URL. `params` become the query string, `timeout` is in seconds.
+ * fetch failures are turned into the matching error class above.
+ */
+async function get(url, { params = {}, headers = {}, timeout = null } = {}) {
+  const fullUrl = new URL(url);
+  for (const [key, value] of Object.entries(params)) {
+    fullUrl.searchParams.append(key, value); // spaces become "+", ":" becomes "%3A"
+  }
+
+  try {
+    const res = await fetch(fullUrl, {
+      headers,
+      signal: timeout === null ? undefined : AbortSignal.timeout(timeout * 1000),
+    });
+    const text = await res.text(); // download the whole body now
+    return new Response(res.status, res.statusText, res.url, text);
+  } catch (err) {
+    if (err.name === "TimeoutError") {
+      throw new RequestTimeoutError(err.message);
+    }
+    if (err instanceof TypeError) {
+      // fetch() reports DNS failures, refused connections and resets as TypeError("fetch failed")
+      throw new ConnectionError(err.cause?.message ?? err.message);
+    }
+    throw new RequestError(err.message);
+  }
+}
+
+/** One object so callers write http.get(...) and http.errors.HttpError, and tests can replace get. */
+export const http = {
+  get,
+  errors: { RequestError, RequestTimeoutError, ConnectionError, HttpError, JsonParseError },
+};
