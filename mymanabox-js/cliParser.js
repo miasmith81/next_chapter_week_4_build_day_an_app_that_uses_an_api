@@ -123,3 +123,75 @@ export class CliParser {
     streams.stderr.write(`${this.prog}: error: ${message}\n`);
     throw new CliExit(2);
   }
+  /**
+   * Parse the command line into a plain object,
+   * e.g. { command: "lookup", name: "sol ring" }.
+   */
+  parseArgs(args = process.argv.slice(2)) {
+    const extras = []; // unknown options and extra values, reported together
+    let i = 0;
+
+    // Options that come before the command name
+    while (i < args.length) {
+      const arg = args[i];
+      if (isHelp(arg)) {
+        this.printHelp();
+        throw new CliExit(0);
+      }
+      if (arg === "--") {
+        i += 1;
+        break;
+      }
+      if (!isOption(arg)) break;
+      extras.push(arg);
+      i += 1;
+    }
+
+    if (i >= args.length) {
+      if (this.commands.required) {
+        this.error(`the following arguments are required: ${this.commands.metavar}`);
+      }
+      return { [this.commands.dest]: null };
+    }
+
+    const command = args[i];
+    const choice = this.commands.choices.get(command);
+    if (!choice) {
+      const options = [...this.commands.choices.keys()].map((name) => `'${name}'`).join(", ");
+      this.error(`argument ${this.commands.metavar}: invalid choice: '${command}' (choose from ${options})`);
+    }
+
+    // Everything after the command name belongs to that command's parser
+    const sub = choice.parser;
+    const values = [];
+    let onlyValues = false; // true after "--": everything is a value
+    for (const arg of args.slice(i + 1)) {
+      if (!onlyValues && arg === "--") {
+        onlyValues = true;
+      } else if (!onlyValues && isHelp(arg)) {
+        sub.printHelp();
+        throw new CliExit(0);
+      } else if (!onlyValues && isOption(arg)) {
+        extras.push(arg);
+      } else if (values.length < sub.positionals.length) {
+        values.push(arg);
+      } else {
+        extras.push(arg);
+      }
+    }
+
+    if (values.length < sub.positionals.length) {
+      const missing = sub.positionals.slice(values.length).map((p) => p.name);
+      sub.error(`the following arguments are required: ${missing.join(", ")}`);
+    }
+    if (extras.length) {
+      this.error(`unrecognized arguments: ${extras.join(" ")}`);
+    }
+
+    const result = { [this.commands.dest]: command };
+    sub.positionals.forEach((p, index) => {
+      result[p.name] = values[index];
+    });
+    return result;
+  }
+}
