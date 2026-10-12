@@ -209,3 +209,80 @@ When Claude Code tried to clone scryfall-cli onto the machine, Mausi rejected it
 - The handoff's JS files are built to copy the Python program, so they use Python names and comments: file names (`py_compat.js`), function names (`py_float`, `str_capitalize`), error class names (`ValueError`, `SystemExit`), comments like `// Python: if __name__ == "__main__"`, and the side-by-side Python lessons. Claude Code is waiting for Mausi to say which of these count as "Python" before writing Step 1.1.
 
 ---
+
+## Entry 6: 2026-10-09 03:40 UTC — JavaScript only: rename plan, Step 1.1
+
+### Prompt (Mausi)
+
+> I don't want any python, only javaScrip. you may keep the prompt.md and it's ok to update all.
+
+### What Claude Code did
+
+1. Picked option B: every JS file uses normal JavaScript names and comments, with no Python names, comments or lessons. The program still behaves the same (same printed text, same exit codes 0/1/2, same help text). Each handoff step still maps to one piece, just with the new names below.
+2. Kept `prompt_log.md` with its history; earlier entries are not rewritten.
+3. **Step 1.1:** created `mymanabox-js/utils.js` with `streams` and `print`.
+4. Check: `print('Sol Ring', 1)`, `print()`, `print('done')` wrote `Sol Ring 1\n`, `\n`, `done\n`.
+5. Stopped for Mausi's review.
+
+### Rename plan (used for every remaining step)
+
+| Handoff name | New JavaScript name |
+|---|---|
+| `py_compat.js` | `utils.js` |
+| `requests_compat.js` | `http.js` |
+| `argparse_compat.js` | `cliParser.js` |
+| `api_client.js`, `card_data.js` | `apiClient.js`, `cardData.js` (`display.js`, `main.js` unchanged) |
+| `tests/api_client.test.js`, `tests/card_data.test.js` | `tests/apiClient.test.js`, `tests/cardData.test.js` |
+| `sys.stdout` / `sys.stderr` | `streams.stdout` / `streams.stderr` |
+| `time.sleep(0.1)` (seconds) | `timer.sleep(100)` (milliseconds, the JS unit) |
+| `ValueError` | `InvalidValueError` |
+| `AttributeError` | removed; `getKey` throws JS's built-in `TypeError` |
+| `SystemExit` | `CliExit` |
+| `dict_get`, `str_capitalize`, `py_float`, `format_fixed` | `getKey`, `capitalize`, `toNumber`, `formatFixed` |
+| `requests.get`, `requests.exceptions.*` | `http.get`, `http.errors.*` |
+| `RequestException`, `Timeout`, `HTTPError`, `JSONDecodeError` | `RequestError`, `RequestTimeoutError`, `HttpError`, `JsonParseError` (`ConnectionError` unchanged) |
+| `status_code`, `raise_for_status()` | `statusCode`, `raiseForStatus()` |
+| `ArgumentParser`, `add_subparsers`, `add_parser`, `add_argument`, `parse_args`, `print_help` | `CliParser`, `addCommands`, `addCommand`, `addArgument`, `parseArgs`, `printHelp` |
+| all `snake_case` functions (`fetch_card_by_name`, `_fmt_price`, `cmd_lookup`, `_headers`, ...) | `camelCase` (`fetchCardByName`, `formatPrice`, `cmdLookup`, `buildHeaders`, ...) |
+| Data keys `price_usd`, `set_name`, `mana_cost`, ... | **unchanged**: they are Scryfall's own JSON field names |
+
+### Commit messages from here on
+
+| Piece | Commit message |
+|---|---|
+| Step 1 | `Add utils.js: print, getKey, toNumber, capitalize, formatFixed, sleep` |
+| Step 2 | `Add http.js: http.get and error classes on top of fetch` |
+| Step 3 | `Add cliParser.js: command-line parser with help and usage errors` |
+| Step 4 | `Add apiClient.js: fetch the data from Scryfall` |
+| Step 5 | `Add cardData.js: clean up the card data` |
+| Step 6 | `Add display.js: display it nicely` |
+| Step 7 | `Add main.js: lookup, compare and search commands with error handling` |
+| Step 8 | `Add the 26 unit tests with node:test` |
+| Step 9 | `Verify output against the live Scryfall API` |
+
+### Decisions
+
+| Decision | Choice | Reason |
+|---|---|---|
+| Python in code, comments, lessons | None | Mausi: "I don't want any python, only javaScrip." |
+| Names | Normal JS `camelCase` | Matching Python names side by side is no longer the goal. |
+| Behavior | Unchanged | Original goal: exact functionality and return values. |
+| `prompt_log.md` history | Kept as written | Mausi: "you may keep the prompt.md". |
+| Step 9 | Compare JS output to the live Scryfall URLs only | No Python is run anywhere. |
+
+---
+
+## Entry 7: 2026-10-09 03:45 UTC — Step 1.2 (`timer.sleep`)
+
+### Prompt (Mausi)
+
+> approve
+
+### What Claude Code did
+
+1. Mausi approved Step 1.1 (`streams`, `print`).
+2. **Step 1.2:** added `timer` with `sleep(ms)` to the end of `mymanabox-js/utils.js`.
+3. Check: `await timer.sleep(100)` waited about 100 ms, then continued.
+4. Stopped for Mausi's review. No commit yet (Step 1 commits after 1.7).
+
+---
