@@ -34,3 +34,36 @@ export function validateNonEmpty(value, label) {
   }
   return true;
 }
+
+/** Fetch one card by name and print its detail block. Returns the exit code. */
+export async function cmdLookup(args) {
+  const name = args.name;
+  if (!validateNonEmpty(name, "Card name")) {
+    return 1; // stop before any network call
+  }
+
+  try {
+    const card = await fetchCardByName(name);
+    const summary = extractCardSummary(card);
+    display.printCardDetail(summary);
+    return 0;
+  } catch (exc) {
+    if (exc instanceof CardNotFoundError) {
+      if (exc.ambiguous) {
+        display.printError(
+          `"${name}" matched several cards. Try a more specific name ` +
+            `or add a set code (e.g. "lightning bolt" -> "lightning bolt lea").`
+        );
+      } else {
+        display.printError(`No card found for "${name}".`);
+      }
+      return 1;
+    }
+    // Network problems already carry a plain-language message from apiClient.js.
+    if (exc instanceof http.errors.RequestError) {
+      display.printError(exc.message);
+      return 1;
+    }
+    throw exc;
+  }
+}
