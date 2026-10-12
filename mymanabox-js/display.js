@@ -69,3 +69,40 @@ export function wrapText(text, width = WRAP_WIDTH) {
   }
   return lines;
 }
+
+/**
+ * Print one card as an aligned, labeled block.
+ *
+ * @param {object} summary Object from cardData.extractCardSummary().
+ */
+export function printCardDetail(summary) {
+  const name = getKey(summary, "name", "Unknown");
+  const bar = "-".repeat(Math.max(name.length + 4, 40));
+
+  // padEnd(14) pads every label to 14 characters so the values line up.
+  print();
+  print(`  ${name}`);
+  print(`  ${bar}`);
+  print(`  ${"Mana Cost".padEnd(14)} ${formatField(getKey(summary, "mana_cost"))}`);
+  print(`  ${"Type".padEnd(14)} ${formatField(getKey(summary, "type_line"))}`);
+  print(`  ${"Rarity".padEnd(14)} ${formatField(getKey(summary, "rarity"))}`);
+  print(`  ${"Set".padEnd(14)} ${formatField(getKey(summary, "set_name"))}`);
+  print(`  ${"Released".padEnd(14)} ${formatField(getKey(summary, "released_at"))}`);
+  print(`  ${"Price (USD)".padEnd(14)} ${formatPrice(getKey(summary, "price_usd"))}`);
+
+  // Creatures only: the P/T row appears when both keys exist.
+  if (Object.hasOwn(summary, "power") && Object.hasOwn(summary, "toughness")) {
+    print(`  ${"P/T".padEnd(14)} ${summary["power"]}/${summary["toughness"]}`);
+  }
+
+  const oracle = getKey(summary, "oracle_text", "");
+  if (oracle) {
+    print();
+    for (const line of wrapText(oracle)) {
+      print(`  ${line}`);
+    }
+  }
+
+  print(`\n  ${"Artist".padEnd(14)} ${formatField(getKey(summary, "artist"))}`);
+  print();
+}
