@@ -1138,3 +1138,37 @@ Entry 13 is left as it was. The text quoted there is the Claude Code note Mausi 
 - `npm test`: 46 tests, 46 pass.
 
 ---
+
+## Entry 28: 2026-10-12 — Check and remove the extra `web-ui` branch
+
+### Prompts (verbatim)
+
+````text
+Go look at my github repo and see that I have 2 branches. I should only have one branch which is main. Look at the screen shot of my tree in vscode. I want to make sure that the web-ui branch can be merged into the main branch and then deleted that it won't break any of my code.
+````
+
+````text
+looks like there is only the main branch. does this look right to you too?
+````
+
+````text
+if I remove the web-ui branch from my vscode won't that also remove it from my github repo once I do a commit and push to my github repo?
+````
+
+````text
+approve and delete the web-ui branch from my github repo
+````
+
+### What was done
+
+1. Compared the two branches on GitHub. The result was `"status":"identical"`, with 0 commits ahead and 0 behind. Both branches were on `c4df445`, and no open pull request used `web-ui`, so there was nothing to merge. `web-ui` was still there only because Claude had been pushing every fix to both branches.
+2. Explained that VS Code's graph didn't draw `web-ui` because it sat on the same commit as `main`, and that Mausi's Mac still needed `git pull`.
+3. Explained that deleting a branch on the Mac never deletes it on GitHub. Only `git push origin --delete <branch>` or GitHub's Branches page does that.
+4. After the approval, Claude checked again before deleting. GitHub no longer had `web-ui` (the compare returned 404), and `git ls-remote --heads origin` listed only `main`. The branch was already gone, so Claude's delete command never ran. Claude then removed its own local copy and pruned.
+5. From now on, changes are pushed to `main` only.
+
+### Checks
+
+- `git ls-remote --heads origin` lists only `refs/heads/main` (`c4df445`).
+
+---
