@@ -1042,3 +1042,37 @@ presentation.md section 6 ("One piece up close") showed `cmdLookup` with the amb
 - `npm test`: 46 tests, 46 pass.
 
 ---
+
+## Entry 25: 2026-10-12 — Remove the `undefined/` screenshot folder (agent mistake)
+
+### Prompts (verbatim)
+
+After I reported the folder, Mausi asked for it to be fixed before finding 8:
+
+````text
+good to bring this up first and lets take care of completely removing the whole folder and all content from my repo.
+````
+
+I proposed two options: remove the folder going forward (recommended), or also erase it from history. Mausi first replied `a`. I asked whether that meant approve, and Mausi answered:
+
+````text
+I approve option A
+````
+
+### Mistake
+
+While checking the web app for audit findings 2 and 3, Claude ran its screenshot script without the output-folder input. The missing input was `undefined`, so the script saved 11 screenshots into a folder literally named `undefined/` at the repo root. That folder was committed by accident in `01da459` (finding 2) and changed in `172352c` (finding 3). It was not in the diffs shown to Mausi. The screenshots only show the app running on test data, so nothing secret was in them.
+
+### What was done
+
+1. Removed `undefined/` and its 11 PNG files with `git rm -r undefined` (option A).
+2. History was not rewritten, so every commit hash in Entries 19–24 still works. Older commits still contain the pictures, as Git keeps any deleted file.
+3. Claude's screenshot script, which lives outside the repo, now refuses to run without an output folder.
+4. No code changed.
+
+### Checks
+
+- `git ls-files undefined` lists nothing.
+- `npm test`: 46 tests, 46 pass.
+
+---
