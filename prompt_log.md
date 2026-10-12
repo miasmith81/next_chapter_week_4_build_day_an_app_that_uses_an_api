@@ -677,3 +677,32 @@ There was no `.env` file because Scryfall is free and needs no API key. `mymanab
 - Web app re-tested with a fake Scryfall: search, compare and phone layout still work.
 
 ---
+
+## Entry 17: 2026-10-12 — Handoff for a ChatGPT cross-reference audit
+
+### Prompt (verbatim)
+
+````text
+I want a handoff to give to chatgpt to do a cross reference audit on the project so far.
+````
+
+### What was done
+
+1. Wrote `chatgpt_audit_handoff.md` in the repo root, so ChatGPT can read it from GitHub. It covers:
+   - the auditor's job (read only, evidence for every finding, list what couldn't be checked);
+   - every source with its link, including the original Python repo and the live site;
+   - the Demo Day rubric and Mausi's standing rules, quoted;
+   - an eight-part checklist: rubric ↔ evidence, Prompt Log ↔ git history, docs ↔ code, Python ↔ JavaScript, `.env` and keys (including git history), web app ↔ CLI, live data, and a light code-quality pass;
+   - known items not to report as new (for example "jace" and search pagination);
+   - the format for the findings.
+2. Fixed a number that would keep going out of date: presentation.md now says `main` has "more than 60 commits" instead of an exact count.
+3. No app code was changed.
+
+### Checks
+
+- Every link in the handoff opens. The original Python repo `miasmith81/scryfall-cli` is public, with branch `master`.
+- Facts used in the handoff were checked against the code:
+  - `innerHTML` appears in `web/app.js` only in a comment.
+  - The tests have 34 top-level `test(...)` calls, which Node counts as 46 with sub-tests.
+
+---
