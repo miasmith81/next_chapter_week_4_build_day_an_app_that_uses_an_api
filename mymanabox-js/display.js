@@ -47,3 +47,25 @@ export function formatPowerToughness(card) {
   }
   return `${power}/${toughness}`;
 }
+
+/** Split text into lines of at most `width` characters, breaking between words. */
+export function wrapText(text, width = WRAP_WIDTH) {
+  const words = text.split(/\s+/).filter((word) => word !== ""); // any run of spaces/newlines splits
+  const lines = [];
+  let current = "";
+  for (const word of words) {
+    if (current.length + word.length + 1 > width) {
+      // This word would overflow: finish the current line and start a new one.
+      if (current) {
+        lines.push(current);
+      }
+      current = word;
+    } else {
+      current = (current + " " + word).trim();
+    }
+  }
+  if (current) {
+    lines.push(current);
+  }
+  return lines;
+}
