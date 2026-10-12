@@ -76,3 +76,20 @@ export function toNumber(value) {
   }
   return Number(trimmed.replaceAll("_", ""));
 }
+
+/**
+ * Format a number with a fixed number of decimals, rounding exact ties to
+ * the even digit: formatFixed(0.125, 2) is "0.12" (toFixed alone gives "0.13").
+ */
+export function formatFixed(value, digits) {
+  const rounded = value.toFixed(digits);
+  const exact = Math.abs(value).toFixed(100); // the number's full decimal expansion
+  const point = exact.indexOf(".");
+  const rest = exact.slice(point + 1 + digits);
+  const isTie = rest[0] === "5" && /^0*$/.test(rest.slice(1));
+  if (!isTie) return rounded;
+  const truncated = exact.slice(0, digits === 0 ? point : point + 1 + digits);
+  const lastDigit = Number(truncated[truncated.length - 1]);
+  if (lastDigit % 2 === 1) return rounded; // odd: rounding up makes it even
+  return (value < 0 ? "-" : "") + truncated; // even: keep it
+}
