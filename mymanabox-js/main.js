@@ -187,3 +187,18 @@ export async function main() {
 
   return await handler(args);
 }
+
+// Run main() only when this file is started with `node main.js`, not when a
+// test imports it. process.argv[1] is the path of the file Node was asked to run.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    process.exitCode = await main();
+  } catch (exc) {
+    // The parser throws CliExit for --help (0) and usage mistakes (2).
+    if (exc instanceof CliExit) {
+      process.exitCode = exc.code;
+    } else {
+      throw exc;
+    }
+  }
+}
