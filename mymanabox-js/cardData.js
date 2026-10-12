@@ -74,3 +74,16 @@ export function getPrice(card) {
     throw err;
   }
 }
+
+/**
+ * Return the card's legality in one format.
+ *
+ * @param {object} card Raw Scryfall card object.
+ * @param {string} fmt Format name, e.g. "standard", "commander", "modern".
+ * @returns {string} "legal", "not_legal", "banned", "restricted",
+ *   or "unknown" when the format isn't listed.
+ */
+export function getLegality(card, fmt) {
+  const legalities = getKey(card, "legalities") || {};
+  return getKey(legalities, fmt, "unknown");
+}
