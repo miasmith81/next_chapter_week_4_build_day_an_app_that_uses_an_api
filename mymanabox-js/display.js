@@ -37,3 +37,13 @@ export function formatField(value, fallback = "n/a") {
   }
   return String(value);
 }
+
+/** Format power/toughness as "2/2", or "n/a" unless both halves exist. */
+export function formatPowerToughness(card) {
+  const power = getKey(card, "power");
+  const toughness = getKey(card, "toughness");
+  if (power === null || toughness === null) {
+    return "n/a";
+  }
+  return `${power}/${toughness}`;
+}
