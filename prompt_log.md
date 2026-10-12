@@ -870,3 +870,35 @@ approve
 - Node 20.12 was not available for testing, so only Node 26 was tested.
 
 ---
+
+## Entry 19: 2026-10-12 — Audit corrections, finding 2: retrying the same input
+
+### Prompt (verbatim)
+
+Approval of the proposed diff for finding 2:
+
+````text
+approve
+````
+
+### Finding
+
+In the web app, the search, card and compare forms submit by setting `location.hash`. The browser only fires `hashchange` when the address changes, so submitting the same input again after a failure sent no new request. Reproduced before the fix: with Scryfall faked as down and then back up, the second submit sent no new request in search, lookup or compare.
+
+### What was done
+
+1. Showed the proposed diff and explanation; Mausi approved it.
+2. `web/app.js`: new `go(hash)`. If the new address is the same as the current one, it calls `navigate()` itself so the route runs again; otherwise it sets `location.hash` as before. The three submit handlers now call `go()`.
+3. The existing comment "allow retrying the same query" (search's error branch) is now accurate. A search that already succeeded still redraws from memory without a new request.
+
+### Checks
+
+- `npm test`: `# pass 46`, `# fail 0`.
+- Outage test in a test browser (Scryfall faked as down, then back up, same input submitted twice):
+  - search: 1st request failed, 2nd request succeeded;
+  - lookup: 1st failed, 2nd succeeded;
+  - compare: card A failed, then A and B loaded (3 requests in total);
+  - no page errors.
+- The usual web checks with a fake Scryfall still pass: search ("12 result(s) returned."), sort by price, ambiguous-name message, "Lower price" badge, empty-search toast, no sideways scrolling on a phone.
+
+---

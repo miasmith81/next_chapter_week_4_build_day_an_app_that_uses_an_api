@@ -146,6 +146,15 @@ function skeletonGrid(count = 12) {
   );
 }
 
+/**
+ * Go to a #hash address. Submitting the same address again doesn't fire
+ * "hashchange", so re-run the route by hand; that lets a failed request be retried.
+ */
+function go(hash) {
+  if (location.hash === hash) navigate();
+  else location.hash = hash;
+}
+
 /** Build a #hash address from parts, encoding each one. */
 function hashFor(view, ...parts) {
   return `#/${[view, ...parts.map((part) => encodeURIComponent(part))].join("/")}`;
@@ -316,7 +325,7 @@ const searchView = {
       this.input.focus();
       return;
     }
-    location.hash = `#/search?q=${encodeURIComponent(query)}`;
+    go(`#/search?q=${encodeURIComponent(query)}`);
   },
 
   async update(route) {
@@ -447,7 +456,7 @@ const cardView = {
       this.input.focus();
       return;
     }
-    location.hash = hashFor("card", name);
+    go(hashFor("card", name));
   },
 
   async update(route) {
@@ -633,7 +642,7 @@ const compareView = {
     // Same checks and wording as the CLI's compare command.
     if (!nameA) return toast("First card name cannot be empty.", "error");
     if (!nameB) return toast("Second card name cannot be empty.", "error");
-    location.hash = hashFor("compare", nameA, nameB);
+    go(hashFor("compare", nameA, nameB));
   },
 
   async update(route) {
