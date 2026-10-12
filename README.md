@@ -4,7 +4,7 @@
 - Review every diff and commit each working piece 
 - Handle the error case and push to GitHub
 
-**MyManaBox** looks up Magic: The Gathering cards with the free [Scryfall API](https://scryfall.com/docs/api). It is written in JavaScript only (Node 20 or newer, no packages to install) and has two ways to use it: a command-line app and a web app.
+**MyManaBox** looks up Magic: The Gathering cards with the free [Scryfall API](https://scryfall.com/docs/api). It is written in JavaScript only (Node 20.12 or newer, no packages to install) and has two ways to use it: a command-line app and a web app.
 
 - **Presentation notes:** [presentation.md](presentation.md)
 - **Prompt Log:** [prompt_log.md](prompt_log.md) (every prompt, logged as the build happened)

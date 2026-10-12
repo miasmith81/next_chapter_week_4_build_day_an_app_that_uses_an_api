@@ -954,3 +954,33 @@ Entry 13 says "Compared with Step 0.1 (`0223a74`)". That label is wrong. `0223a7
 - `git diff 17053d3 bfc4542 -- mymanabox-js/package.json` shows only the added `"web"` line.
 
 ---
+
+## Entry 22: 2026-10-12 — Audit corrections, finding 5: Node version in the README
+
+### Prompt (verbatim)
+
+Approval of the proposed diff for finding 5:
+
+````text
+approve
+````
+
+### Finding
+
+README.md line 7 said "Node 20 or newer", but `package.json` requires `>=20.12` and `main.js` calls `process.loadEnvFile`, which first appeared in Node 20.12.
+
+### What was done
+
+1. Showed the proposed diff and explanation; Mausi approved it.
+2. README.md line 7 now says "Node 20.12 or newer". README line 44, `package.json` and the audit handoff already said 20.12.
+
+### Checks
+
+- The official Node v20.12.0 was downloaded to Claude's cloud workspace, not Mausi's Mac. Its SHA-256 matched nodejs.org's SHASUMS256.txt.
+- Under Node v20.12.0:
+  - `npm test`: `# tests 46`, `# pass 46`, `# fail 0`;
+  - `loadEnv()` read a test `.env`, and the User-Agent came from it;
+  - `node main.js lookup "   "` printed `Error: Card name cannot be empty.` and exited 1.
+- **Not tested:** a live Scryfall lookup under Node 20.12, because the cloud workspace can't reach Scryfall. Mausi's Mac has Node 23–26 only. Live lookups were tested on Node 26.
+
+---
