@@ -87,3 +87,17 @@ export function getLegality(card, fmt) {
   const legalities = getKey(card, "legalities") || {};
   return getKey(legalities, fmt, "unknown");
 }
+
+/**
+ * Build the data for a side-by-side display of two cards.
+ *
+ * @param {object} cardA Raw Scryfall card object.
+ * @param {object} cardB Raw Scryfall card object.
+ * @returns {object} { a, b }, each one an extractCardSummary result.
+ */
+export function compareCards(cardA, cardB) {
+  return {
+    a: extractCardSummary(cardA),
+    b: extractCardSummary(cardB),
+  };
+}
