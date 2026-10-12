@@ -29,3 +29,11 @@ export function formatPrice(price) {
     throw err;
   }
 }
+
+/** Return value as text when it has content, otherwise the fallback. */
+export function formatField(value, fallback = "n/a") {
+  if (value === null || String(value).trim() === "") {
+    return fallback;
+  }
+  return String(value);
+}
