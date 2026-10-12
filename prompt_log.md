@@ -933,3 +933,24 @@ When a name matched several cards, the CLI and the web app said "Try a more spec
 - The web app with a fake Scryfall shows the same sentence for `bolt`.
 
 ---
+
+## Entry 21: 2026-10-12 — Audit corrections, finding 4: wrong commit cited in Entry 13
+
+### Prompt (verbatim)
+
+Approval of the proposed diff for finding 4:
+
+````text
+approve
+````
+
+### Correction note for Entry 13
+
+Entry 13 says "Compared with Step 0.1 (`0223a74`)". That label is wrong. `0223a74` is the commit that added BUILD_SUMMARY.md and Entry 11. Step 0.1, the commit that first added `mymanabox-js/package.json`, is **`17053d3`** ("Set up Node project for MyManaBox JS translation"). `package.json` was identical in both commits, so Entry 13's result still holds. Compared with Step 0.1 (`17053d3`), the only change in the restore (`bfc4542`) is the new `"web": "node web/server.js"` line. Entry 13 itself is left unchanged as history.
+
+### Checks
+
+- `git log --diff-filter=A -- mymanabox-js/package.json` lists only `17053d3`.
+- `git diff 17053d3 bfc4542 -- mymanabox-js/package.json` shows only the added `"web"` line.
+
+---
