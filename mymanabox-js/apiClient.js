@@ -83,3 +83,35 @@ export async function fetchCardByName(name) {
         details.toLowerCase().includes("too many") || details.toLowerCase().includes("ambiguous");
       throw new CardNotFoundError(details || `No card found: ${name}`, ambiguous);
     }
+    response.raiseForStatus(); // throws HttpError for any other 4xx or 5xx
+    return response.json();
+  } catch (exc) {
+    // Our own "not found" error passes straight through.
+    if (exc instanceof CardNotFoundError) {
+      throw exc;
+    }
+    // Replace low-level messages with plain-language ones the CLI can print.
+    // Order matters: RequestError is the parent of the other three classes.
+    if (exc instanceof http.errors.RequestTimeoutError) {
+      throw new http.errors.RequestTimeoutError(
+        `Scryfall did not respond within ${TIMEOUT}s. Check your connection.`
+      );
+    }
+    if (exc instanceof http.errors.ConnectionError) {
+      throw new http.errors.ConnectionError(
+        "Could not reach Scryfall. Check your internet connection."
+      );
+    }
+    if (exc instanceof http.errors.HttpError) {
+      throw new http.errors.HttpError(`Scryfall returned an error: ${exc.message}`, {
+        cause: exc,
+      });
+    }
+    if (exc instanceof http.errors.RequestError) {
+      throw new http.errors.RequestError(`Unexpected network error: ${exc.message}`, {
+        cause: exc,
+      });
+    }
+    throw exc; // anything else is a real bug: let it crash loudly
+  }
+}
