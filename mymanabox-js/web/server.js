@@ -51,6 +51,13 @@ const server = createServer(async (req, res) => {
     return res.end();
   }
 
+  // Never serve hidden files such as .env (settings and keys) or .gitignore.
+  // .gitignore only keeps .env out of Git; this check keeps it off the server.
+  // Any part of the path that starts with "." counts, e.g. /.env or /web/.env.
+  if (pathname.split("/").some((part) => part.startsWith("."))) {
+    return sendText(res, 404, "Not found");
+  }
+
   // Resolve the path inside ROOT only, so "/../something" can't escape the folder.
   const filePath = resolve(ROOT, "." + pathname + (pathname.endsWith("/") ? "index.html" : ""));
   if (!filePath.startsWith(ROOT + sep)) {

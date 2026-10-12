@@ -706,3 +706,167 @@ I want a handoff to give to chatgpt to do a cross reference audit on the project
   - The tests have 34 top-level `test(...)` calls, which Node counts as 46 with sub-tests.
 
 ---
+
+## Entry 18: 2026-10-12 — Audit corrections, finding 1: the local server served `.env`
+
+### Prompts (verbatim)
+
+The audit handoff:
+
+````text
+# Handoff to Claude Code: MyManaBox Audit Corrections
+
+**From:** Mausi  
+**Audit date:** October 12, 2026  
+**Repository:** https://github.com/miasmith81/next_chapter_week_4_build_day_an_app_that_uses_an_api  
+**Audited baseline:** `a04ce6966ada83db27628584755b9498f428845a`
+
+## Your task
+
+Address the remaining audit findings one small piece at a time. First inspect the current checkout and identify changes since the audited baseline. Do not redo completed work or add features.
+
+Follow my build loop:
+
+**ask → review the diff → accept → test → verify the data → commit**
+
+Show the complete proposed diff and explain it plainly. Wait for my explicit approval before applying each fix. After approval, test and verify it, show the result, and commit that piece separately. Update `prompt_log.md` with my actual prompts verbatim. Do not invent missing prompts or silently rewrite historical entries; append correction notes when necessary.
+
+## Clarifications from Mausi
+
+These answers resolve earlier audit uncertainties:
+
+1. **I personally reviewed every diff.** Do not describe the automated build as lacking my review.
+2. **I requested that `version` and `description` be put back.** The deletion occurred in `e66d0c2` (Web UI 1, associated with Entry 12). Restoration occurred in `bfc4542` (Web UI 10, Entry 13).
+3. **The assignment does not require a real API key.** Scryfall’s lack of authentication is not an assignment failure.
+
+If Entry 13 needs my exact original restoration prompt, ask me for it. My clarification establishes what I requested; it does not supply the original wording.
+
+## Findings to address
+
+### 1. Local web server serves `.env` — highest priority
+
+**Evidence:** `mymanabox-js/web/server.js:54–66` resolves and serves any file inside `mymanabox-js`. During the audit, a HEAD request to `http://127.0.0.1:5179/.env` returned **HTTP 200**. No response body was requested or displayed.
+
+`.gitignore` protects against normal Git tracking; it does not prevent HTTP access. The server binds to localhost, so the audit did not establish public Internet exposure.
+
+**Proposed correction:** Block `.env` and private files before reading or serving them.
+
+**Verification:** With a harmless local `.env` present, HEAD and GET requests must return a denial or not-found response without its contents. Confirm `/web/` and the shared JavaScript modules still load. Never print real `.env` contents during testing.
+
+### 2. Submitting the same input cannot retry a failed request
+
+**Evidence:** `web/app.js:319`, `450`, and `636` submit by assigning `location.hash`; line `800` listens for `hashchange`. Assigning the same hash does not trigger another request. Line `355` claims to allow retrying the same search, but clearing state alone does not accomplish that.
+
+**Proposed correction:** Explicitly rerun the current route when the submitted hash is unchanged.
+
+**Verification:** Simulate a temporary failure, restore service, and submit the same input again. Confirm a new request occurs and succeeds for search, lookup, and compare.
+
+### 3. Ambiguous-name message gives incorrect set-code advice
+
+**Evidence:** `main.js:71–72` and `web/cardView.js:144–145` suggest `"lightning bolt lea"`. `apiClient.js` sends that entire string as `fuzzy`; it does not send a separate set parameter.
+
+The live command returned the **Marvel Super Heroes Commander** printing, not Limited Edition Alpha. This advice also exists in the original Python program.
+
+**Proposed correction:** Remove the set-code example and advise a more specific card name. Do not add set-selection functionality.
+
+**Verification:** Confirm CLI and web ambiguous-name messages match, and update affected tests and documentation.
+
+### 4. Entry 13 cites the wrong Step 0.1 commit
+
+**Evidence:** `prompt_log.md:584` identifies `0223a74` as Step 0.1. That commit added the Step 9 build summary and Entry 11. The initial package file was committed in **`17053d3`**.
+
+**Proposed correction:** Append a correction with the accurate commit reference. The restoration itself was verified as correct.
+
+### 5. README gives an overly broad Node requirement
+
+**Evidence:** `README.md:7` says Node 20 or newer. `package.json:7` requires **20.12 or newer**, and `main.js:36` calls `process.loadEnvFile`.
+
+**Proposed correction:** State Node **20.12+** consistently.
+
+**Verification:** Run the tests and a live lookup under Node 20.12 if available. If unavailable, report that explicitly rather than claiming compatibility was tested.
+
+### 6. Missing power/toughness description is inaccurate
+
+**Evidence:** `README.md:33` says missing P/T displays `n/a`. Lookup actually omits the P/T row; comparison can display `n/a`.
+
+**Proposed correction:** Describe those two behaviors accurately. No code change is needed.
+
+### 7. Presentation’s `cmdLookup` example is abbreviated
+
+**Evidence:** `presentation.md:133–136` replaces the important error branch with `...`, which is not executable JavaScript. The actual branch is in `main.js:68–77`.
+
+**Proposed correction:** Show the actual branch or clearly label the snippet as an abbreviated illustration. Prefer the actual branch because it is the change Mausi will explain.
+
+### 8. Additional numeric translation differences need documentation
+
+**Evidence:** The audit compared the Python and JavaScript formatters in memory:
+
+| Input | Python output | JavaScript output |
+|---|---|---|
+| `"NaN"` | `$nan` | `n/a` |
+| `"Infinity"` | `$inf` | `n/a` |
+| `"-Infinity"` | `$-inf` | `n/a` |
+| `"١.٢٥"` | `$1.25` | `n/a` |
+
+These differences come from `utils.js:58–77`. No demonstrated Scryfall price was affected.
+
+**Proposed correction:** Document the narrower numeric-input behavior as a translation exception. Do not expand the implementation without my approval.
+
+### 9. Prompt-log wording needs qualification
+
+**Evidence:** `presentation.md:66` claims every prompt is quoted word for word. Entry 15 is already explicitly labeled partly summarized.
+
+**Proposed correction:** Acknowledge that known exception in the presentation. Check Entry 13’s recorded prompt against my actual restoration request. Preserve history and append corrections where appropriate.
+
+## What the audit verified
+
+- Local checkout matched public GitHub `main` and was clean.
+- **46 tests passed:** 34 top-level tests plus 12 subtests.
+- Historical test totals reproduced: **38 → 44 → 46**, all passing.
+- Current lookup, comparison, and 175-card goblin-search output matched the original Python display functions exactly for the same API data.
+- The deployed root redirected to `mymanabox-js/web/`.
+- Live dragon search returned **122 cards**.
+- `.env` was ignored and untracked; the requested `.env` history search returned nothing.
+- Credential-keyword matches in reachable local history contained no detected credentials. This was a scoped scan, not an absolute guarantee.
+- The web build reused the CLI modules without modifying them.
+- `innerHTML` appeared only in a comment; card text was inserted using text nodes.
+- The package metadata deletion and restoration were confirmed in Git history.
+
+## Known items: do not reopen as new findings
+
+Jace now resolves to a token; search deliberately loads only the first page; earlier naming plans were superseded; Entry 15 is summarized; the web app was separately requested; EPIPE handling was deliberately omitted.
+
+The build summary’s **38 tests** is valid for its earlier CLI snapshot. Do not treat it as a failed current test count.
+
+## Remaining verification limits
+
+The auditor did not independently verify every original conversation, historical screenshot, the historical 43-case comparison, a timed two-minute rehearsal, or LMS submission. Do not turn these into confirmed claims without the underlying evidence.
+
+**Start with finding 1. Inspect the server, present one narrowly scoped proposed diff, and wait for my approval.**
+````
+
+Approval of the proposed diff for finding 1:
+
+````text
+approve
+````
+
+### Finding
+
+`npm run web` (`mymanabox-js/web/server.js`) served any file inside `mymanabox-js`, including the git-ignored `.env`. Reproduced before the fix: `HEAD /.env` returned 200 (with a harmless test `.env`; its contents were never printed). `.gitignore` keeps `.env` out of Git, not off a web server. The server only listens on this computer (127.0.0.1), so this was not exposed to the Internet.
+
+### What was done
+
+1. Showed the proposed diff and explanation; Mausi approved it.
+2. `web/server.js`: before reading any file, the server now answers "404 Not found" when any part of the address starts with `.` (for example `/.env`, `/web/.env`, `/.gitignore`). The check runs on the decoded address, so `/%2eenv` is caught too.
+3. Nothing else changed.
+
+### Checks
+
+- `npm test` on the Mac (Node v26.0.0): `# pass 46`, `# fail 0`.
+- On the Mac, in a temporary copy with a harmless test `.env` (Mausi's real `.env` was not touched or printed), every request below got 404 for both HEAD and GET, and the test value never appeared in a response: `/.env`, `/web/../.env`, `/%2eenv`, `/%2e%2e/mymanabox-js/.env`, `/.ENV`, `/web/.env`, `/.gitignore`.
+- The page and shared modules still return 200 for HEAD and GET: `/web/`, `/web/app.js`, `/apiClient.js`, `/cardData.js`, `/display.js`.
+- The web app, served by this server in a test browser with a fake Scryfall, still searches ("12 result(s) returned."), compares ("Lower price" badge) and has no sideways scrolling on a phone.
+- Node 20.12 was not available for testing, so only Node 26 was tested.
+
+---
