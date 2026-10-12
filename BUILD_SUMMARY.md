@@ -100,6 +100,8 @@ Before anything was committed, the same build was also run against a fake Scryfa
 
 - **Names:** every file, function, class and property uses the Entry 6 JavaScript name (`getKey`, `http.get`, `statusCode`, `CliParser`, `fetchCardByName`, ...). Printed text, Scryfall keys and CLI argument names were not changed.
 - **Sleep in milliseconds:** `timer.sleep(100)` in 4.4 and 4.7, and the 8.2 test expects `[100]`. `TIMEOUT` stays 10 seconds, and `http.get` multiplies it by 1000.
+- **Unusual price text shows `n/a`:** Python's `float()` also accepts "NaN", "Infinity", "-Infinity" and digits from other writing systems such as "١.٢٥", and prints `$nan`, `$inf`, `$-inf` or `$1.25`. The JavaScript `toNumber` in `utils.js` accepts only plain number text, so all of these show `n/a`. Scryfall sends prices like "1.25", so live output is the same. This was left as is, because matching Python would mean new code.
+- **Ambiguous-name message:** since audit finding 3 (`172352c`), it reads `"<name>" matched several cards. Try a more specific name, such as the full card name.` The set-code tip was dropped because `lookup` can't choose a set.
 - **`AttributeError` dropped:** `getKey` throws a `TypeError` on non-object data. Behavior is unchanged, because a `TypeError` from bad data is never caught on the way.
 - **Comments:** each piece has short JavaScript comments that explain the non-obvious parts, such as why `getKey` can't use `??` and why compare doesn't use `Promise.all`. No Python comments remain.
 - **Test descriptions** are plain English without function names. Every assertion is the same as in the handoff.

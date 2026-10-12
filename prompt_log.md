@@ -1076,3 +1076,33 @@ While checking the web app for audit findings 2 and 3, Claude ran its screenshot
 - `npm test`: 46 tests, 46 pass.
 
 ---
+
+## Entry 26: 2026-10-12 — Audit corrections, finding 8: document the number and message differences
+
+### Prompt (verbatim)
+
+Approval of the proposed diff for finding 8:
+
+````text
+approve
+````
+
+### Finding
+
+Two differences from the Python original were not listed in BUILD_SUMMARY.md section 5 ("Deviations from the handoff, and why"):
+- Odd price text. Python's `float()` accepts "NaN", "Infinity", "-Infinity" and "١.٢٥" and prints `$nan`, `$inf`, `$-inf` and `$1.25`. JavaScript's `toNumber` (`utils.js`) rejects all four, so they show `n/a`.
+- The ambiguous-name message has been different from the Python since finding 3.
+
+### What was done
+
+1. Showed the proposed diff and explanation; Mausi approved it.
+2. BUILD_SUMMARY.md section 5: added two bullets after "Sleep in milliseconds", one for each difference.
+3. No code changed, as the handoff asked ("Do not expand the implementation without my approval").
+
+### Checks
+
+- Checked the Python side by running `float()` on the four values in the terminal: `$nan $inf $-inf $1.25`. No Python was added to the repo.
+- `toNumber` throws `InvalidValueError` for all four, and the caller shows `n/a`.
+- `npm test`: 46 tests, 46 pass.
+
+---
