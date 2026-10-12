@@ -42,3 +42,21 @@ function formatRows(rows) {
     return left.padEnd(helpPosition) + help;
   });
 }
+
+/** The set of sub-commands (lookup, compare, search) that belongs to one parser. */
+class Commands {
+  constructor(parent, dest, metavar) {
+    this.parent = parent;
+    this.dest = dest; // the key the chosen command is stored under, e.g. "command"
+    this.metavar = metavar; // how the command slot is shown in help, e.g. "<command>"
+    this.required = false;
+    this.choices = new Map(); // name -> { parser, help }
+  }
+
+  /** Add a sub-command and return its own parser, for adding its arguments. */
+  addCommand(name, { help = null } = {}) {
+    const parser = new CliParser({ prog: `${this.parent.prog} ${name}` });
+    this.choices.set(name, { parser, help });
+    return parser;
+  }
+}
