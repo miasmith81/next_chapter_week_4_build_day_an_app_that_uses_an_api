@@ -63,7 +63,7 @@ Then open the live web app and search `t:dragon r:mythic`. Open a card to show i
 | **Meets the spec:** on GitHub | ✅ | Everything is on `main`, and the web app is live on GitHub Pages. |
 | **Build skill:** it runs and shows real data, verified | ✅ | CLI output was compared field by field with Scryfall's JSON (BUILD_SUMMARY.md, section 4). The live site was checked in Chrome on 2026-10-12. |
 | **Control:** reviewed diffs, small commits | ✅ | Each piece followed "ask, review the diff, accept, test, verify the data, commit" (prompt_log Entry 2). `main` has more than 60 commits, and most add one piece: 46 "Step" commits for the CLI and 11 "Web UI" commits. |
-| **Control:** Prompt Log complete | ✅ | prompt_log.md has an entry for every prompt, each quoting it word for word. |
+| **Control:** Prompt Log complete | ✅ | prompt_log.md has an entry for every prompt, each quoting it word for word. Entry 15 quotes the first three lines of a long course-page paste and summarizes the rest, as its heading says. |
 | **Control:** caught a mistake | ✅ | Five mistakes were caught and fixed (section 8). |
 | **Control:** can explain any part | ✅ | Section 6 has one plain-language line per file. |
 | **Demo:** run it and explain one agent change in 2 minutes | ✅ | The script above. |

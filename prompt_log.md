@@ -1106,3 +1106,35 @@ Two differences from the Python original were not listed in BUILD_SUMMARY.md sec
 - `npm test`: 46 tests, 46 pass.
 
 ---
+
+## Entry 27: 2026-10-12 — Audit corrections, finding 9: Prompt Log accuracy (correction note for Entry 13)
+
+### Prompts (verbatim)
+
+I asked Mausi for the exact wording of their request to restore version and description, or to say if they no longer had it. Mausi answered:
+
+````text
+state that the exact wording wasn't recorded. approve
+````
+
+### Finding
+
+- presentation.md section 3 said every Prompt Log entry quotes its prompt word for word. Entry 15 only quotes the first three lines and summarizes the rest (its heading says so).
+- Entry 13's "Prompt (verbatim)" is not Mausi's request. It is the note from Claude Code in VS Code that Mausi pasted, and that note only offered to restore `version` and `description`.
+
+### Correction note for Entry 13
+
+Entry 13 is left as it was. The text quoted there is the Claude Code note Mausi pasted, not Mausi's own words. Mausi requested that `version` and `description` be put back in `mymanabox-js/package.json`; the exact wording of that request wasn't recorded. The restore itself is commit `bfc4542`.
+
+### What was done
+
+1. Showed the proposed diff and explanation; Mausi approved it.
+2. presentation.md section 3, "Prompt Log complete" row: added that Entry 15 quotes the first three lines of a long paste and summarizes the rest.
+3. Appended this correction note instead of rewriting Entry 13.
+4. No code changed.
+
+### Checks
+
+- `npm test`: 46 tests, 46 pass.
+
+---
