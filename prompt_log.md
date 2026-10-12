@@ -54,10 +54,6 @@ Smaller commits are fine too (for example one per sub-step like 4.4, 4.5, 4.6), 
 
 > I am building a simple program that calls another API and I will retrieve some data. We need to translate the working program from python to javaScript. I want you to review my github repo and look at scryfall-cli and MyManaBox for the working code that we are going to translate code for code. I want to make sure we are using all the python code and translating into javaScript and don't make up any other code and I want the exact functionality and the return. Think step by step and give detailed instructions in small code pieces that you will create a handoff to claude code who will build out the actual code in my vsCode. I only want a single detailed instructions of the small code pieces for the handoff to claude code. Create a running prompt_log.md file that will capture our whole build.
 
-### Standing preferences (from Mausi's profile)
-
-> I am learning python so I need detailed think step by step explanations. Also explain it in javaScript so I understand it better since I understand javaScript but make sure you are then explaining all the python syntax and what it means.
-
 ### What Claude did
 
 1. Found and cloned both repos: `miasmith81/scryfall-cli` and `miasmith81/MyManaBox` (both public forks).
