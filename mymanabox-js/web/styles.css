@@ -211,7 +211,8 @@ select {
   margin: 0 auto;
   padding: clamp(20px, 4vw, 44px) clamp(16px, 4vw, 40px) 120px;
   outline: none;
-  animation: fade-up 0.45s var(--ease-out) both;
+  /* No "both" fill: a transform kept after the animation would trap the fixed backdrop inside this box */
+  animation: fade-up 0.45s var(--ease-out);
 }
 
 .footer {
