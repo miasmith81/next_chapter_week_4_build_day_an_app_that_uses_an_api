@@ -48,3 +48,29 @@ export function extractCardSummary(card) {
 
   return summary;
 }
+
+/**
+ * Return the USD market price as a number, or null when there isn't one.
+ *
+ * Scryfall sends prices as strings ("0.79") or null; converting here means
+ * the display layer always gets the same type.
+ *
+ * @param {object} card Raw Scryfall card object.
+ * @returns {number|null} Price in USD, or null when missing or invalid.
+ */
+export function getPrice(card) {
+  const prices = getKey(card, "prices") || {}; // "prices" can be missing or null
+  const usd = getKey(prices, "usd");
+  if (usd === null) {
+    return null;
+  }
+  try {
+    return toNumber(usd);
+  } catch (err) {
+    // "not-a-price" -> InvalidValueError; an object or array -> TypeError
+    if (err instanceof InvalidValueError || err instanceof TypeError) {
+      return null;
+    }
+    throw err;
+  }
+}
