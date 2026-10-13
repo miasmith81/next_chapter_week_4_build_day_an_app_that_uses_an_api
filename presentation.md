@@ -43,6 +43,10 @@ Then open the live web app and search `t:dragon r:mythic`. Open a card to show i
 
 > "When the agent added the `npm run web` command to `package.json`, it also deleted the `version` and `description` lines, which I never asked for. I caught it by reviewing the diff against the original file, and I had them put back in a separate, logged commit (prompt_log Entry 13)."
 
+**Cleaning up a branch the agent created.**
+
+> "I noticed the agent had created a second branch, and that it was identical to my `main` branch. Before deleting anything, I checked that deleting Claude's branch would not lose any work or break my code. Then I deleted it, so the repo has one branch: `main`."
+
 ### 4. One thing I'd add next (15 seconds)
 
 > "Search only shows the first page of results, up to 175 cards. There's already a `TODO` in `searchCards` for it, so next I'd add pagination to load the rest."
