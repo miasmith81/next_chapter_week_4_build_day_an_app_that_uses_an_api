@@ -41,14 +41,22 @@ export async function askManaGuide(question, context, fetchImpl = fetch) {
     body: JSON.stringify({ question, context }),
   });
 
+  const contentType = response.headers?.get?.("content-type") || "";
+  const staticHostResponse = [404, 405].includes(response.status) ||
+    (contentType && !contentType.toLowerCase().includes("application/json"));
+  if (staticHostResponse) {
+    throw new AssistantRequestError(
+      "GitHub Pages cannot run ManaGuide's private AI backend. For the complete demo, run npm run web and open the local address it prints.",
+      response.status
+    );
+  }
+
   let payload;
   try {
     payload = await response.json();
   } catch {
     throw new AssistantRequestError(
-      response.status === 404
-        ? "ManaGuide needs the local MyManaBox server. Run npm run web, then open its local address."
-        : "ManaGuide received an unreadable response.",
+      "ManaGuide received an unreadable response from its backend.",
       response.status
     );
   }

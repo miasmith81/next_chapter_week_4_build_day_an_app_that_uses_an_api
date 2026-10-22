@@ -68,3 +68,23 @@ test("browser client shows the backend's safe failure message", async () => {
     (error) => error instanceof AssistantRequestError && error.status === 429 && /busy right now/.test(error.message)
   );
 });
+
+test("browser client explains that GitHub Pages cannot run the private backend", async () => {
+  const fetchImpl = async () => ({
+    ok: false,
+    status: 405,
+    headers: { get: () => "text/html; charset=utf-8" },
+    async json() {
+      throw new Error("HTML is not JSON");
+    },
+  });
+
+  await assert.rejects(
+    askManaGuide("What is flying?", null, fetchImpl),
+    (error) =>
+      error instanceof AssistantRequestError &&
+      error.status === 405 &&
+      /GitHub Pages cannot run ManaGuide's private AI backend/.test(error.message) &&
+      /npm run web/.test(error.message)
+  );
+});
