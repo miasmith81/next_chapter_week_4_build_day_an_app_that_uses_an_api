@@ -6,6 +6,8 @@
 
 **MyManaBox** looks up Magic: The Gathering cards with the free [Scryfall API](https://scryfall.com/docs/api). It is written in JavaScript only (Node 20.12 or newer, no packages to install) and has two ways to use it: a command-line app and a web app.
 
+For Week 6, the local web app also includes **ManaGuide**, a reliable Gemini-powered helper. It can answer a short Magic question and, while a card page is open, use that card's current Scryfall details as context. The browser never receives the Gemini API key.
+
 - **Presentation notes:** [presentation.md](presentation.md)
 - **Prompt Log:** [prompt_log.md](prompt_log.md) (every prompt, logged as the build happened)
 - **Build summary:** [BUILD_SUMMARY.md](BUILD_SUMMARY.md)
@@ -35,16 +37,19 @@ node main.js --help
 
 ### Settings and secrets (`.env`)
 
-API keys and settings belong in a `.env` file, never in the code. `.env` is listed in `mymanabox-js/.gitignore`, so Git never commits it. `.env.example` is committed instead, to show which settings exist without any real values.
+API keys and settings belong in a `.env` or `.env.gemini` file, never in the code. Both patterns are listed in `mymanabox-js/.gitignore`, so Git never commits them. `.env.example` is committed instead, to show which settings exist without any real values.
 
 ```bash
 cd mymanabox-js
 cp .env.example .env    # then edit .env with your own values
+chmod 600 .env          # only your account can read it
 ```
 
-`main.js` loads `.env` when it starts, using Node's built-in `process.loadEnvFile` (Node 20.12 or newer), so there are no packages to install. Scryfall is free and needs no API key, so the only setting today is `SCRYFALL_USER_AGENT`, the contact name the app sends to Scryfall. Without a `.env`, the app uses its default.
+`main.js` loads `.env` for the command-line app. The local web server loads both `.env` and `.env.gemini`, using Node's built-in `process.loadEnvFile` (Node 20.12 or newer), so there are no packages to install. Scryfall is free and needs no API key. ManaGuide requires `GEMINI_API_KEY`; `GEMINI_APP_MODEL` and `GEMINI_APP_FALLBACK_MODELS` are optional.
 
-The web app on GitHub Pages can't use `.env`. Anything a browser downloads is public, so a real secret key would need its own server.
+The browser calls `POST /api/chat` on the local Node server. That server adds the secret key, calls Gemini, validates the response, and returns only the answer and model name. The key never appears in the URL, browser JavaScript, response, or Git history.
+
+The existing GitHub Pages demo remains the static Scryfall app. GitHub Pages cannot run the secret-holding backend, so ManaGuide must be demonstrated through `npm run web` unless the project is later deployed to a backend-capable host.
 
 ### Tests
 
@@ -64,7 +69,7 @@ A browser version of the `mymanabox-js` command-line app. It reuses the same Jav
 ```bash
 cd mymanabox-js
 npm run web        # then open http://localhost:5173/web/
-npm test           # 46 tests, including the web helpers
+npm test           # 60 tests, including the AI guardrails and backend route
 ```
 
 ### What it does
@@ -75,6 +80,19 @@ npm test           # 46 tests, including the web helpers
 - **Compare** two cards side by side. Rows that differ are highlighted and the cheaper card gets a badge.
 - **Micro-interactions:** card tilt and foil shine that follow the mouse, loading shimmer, smooth page transitions, and toasts. Motion is turned off for people who ask their system for reduced motion.
 - **Keyboard:** press `/` to jump to the search box.
+- **ManaGuide:** ask a short Magic question from any view; on a card page it receives a small, whitelisted set of that card's Scryfall fields.
+
+## ManaGuide reliability and cost controls
+
+- **System prompt:** fixes the role to a beginner-friendly Magic helper, treats card context as untrusted data, refuses secret/system-prompt requests, and forbids invented card text, prices, rulings, or legality.
+- **Bad input guardrail:** requires JSON text, trims whitespace, rejects blank questions, caps questions at 500 characters, caps the whole request at 16 KB, and whitelists/caps card fields again on the server.
+- **Bad output guardrail:** requires nonblank Gemini text, rejects answers over 2,000 characters, ignores thought parts, and renders the answer with text nodes rather than HTML.
+- **Failure guardrail:** uses a 12-second timeout, falls back from temporary/model-availability failures, hides provider details, and gives the user a safe retry message.
+- **Cost cap:** sends one question with no conversation history, uses minimal/low thinking, and caps total model output (including thinking) at 400 tokens.
+
+At Google's standard paid pricing through December 31, 2026 ($0.75 per million input tokens and $3.75 per million output tokens for Gemini 3.6/3.8 Flash), a deliberately conservative 575-token input plus the full 400-token output cap is about **$0.00194 per call**—less than two-tenths of a cent. Free-tier calls are free. See [Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing).
+
+The full Week 6 acceptance checklist, break tests, data flow and demo outline are in [WEEK6_AI_BUILD.md](WEEK6_AI_BUILD.md). The Week 6 prompts are logged separately in [WEEK6_PROMPT_LOG.md](WEEK6_PROMPT_LOG.md), leaving the completed Week 4 log unchanged.
 
 ### How GitHub Pages serves it
 
