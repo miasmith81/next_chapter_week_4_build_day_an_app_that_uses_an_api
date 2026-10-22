@@ -15,6 +15,7 @@ import { fetchCardByName, searchCards } from "../apiClient.js";
 import { compareCards, extractCardSummary, getPrice } from "../cardData.js";
 import { formatField, formatPrice } from "../display.js";
 import { getKey } from "../utils.js";
+import { ASSISTANT_QUESTION_LIMIT, askManaGuide, buildCardContext } from "./assistant.js";
 import {
   cardFaces,
   cardImage,
@@ -818,4 +819,92 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+// ---------------------------------------------------------------------------
+// ManaGuide: one guarded question at a time, with optional current-card context
+// ---------------------------------------------------------------------------
+
+function activeAssistantCard() {
+  if (activeName !== "card" || !state.lastCard) return null;
+  return state.cards.get(state.lastCard.toLowerCase()) || null;
+}
+
+function assistantMessage(text, kind, model = "") {
+  const message = h("p", { class: `assistant-message assistant-message-${kind}` }, text);
+  if (model) message.append(h("small", {}, `Answered by ${model}`));
+  return message;
+}
+
+function initAssistant() {
+  const toggle = document.getElementById("assistant-toggle");
+  const panel = document.getElementById("assistant-panel");
+  const close = document.getElementById("assistant-close");
+  const messages = document.getElementById("assistant-messages");
+  const contextLabel = document.getElementById("assistant-context");
+  const form = document.getElementById("assistant-form");
+  const input = document.getElementById("assistant-question");
+  const count = document.getElementById("assistant-count");
+  const submit = form.querySelector("button[type='submit']");
+
+  function refreshContext() {
+    const card = activeAssistantCard();
+    contextLabel.textContent = card ? `Using card: ${getKey(card, "name", "Unknown")}` : "No card selected";
+    input.placeholder = card ? `Ask about ${getKey(card, "name", "this card")}` : "Ask a Magic question";
+    return card;
+  }
+
+  function setOpen(open) {
+    panel.hidden = !open;
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.hidden = open;
+    if (open) {
+      refreshContext();
+      input.focus();
+    } else {
+      toggle.focus();
+    }
+  }
+
+  toggle.addEventListener("click", () => setOpen(true));
+  close.addEventListener("click", () => setOpen(false));
+  input.addEventListener("input", () => {
+    count.textContent = `${input.value.length}/${ASSISTANT_QUESTION_LIMIT}`;
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const question = input.value.trim();
+    if (!question) {
+      input.focus();
+      return;
+    }
+
+    const card = refreshContext();
+    messages.append(assistantMessage(question, "user"));
+    const waiting = assistantMessage("Thinking…", "guide");
+    messages.append(waiting);
+    messages.scrollTop = messages.scrollHeight;
+    form.classList.add("is-loading");
+    input.disabled = true;
+    submit.disabled = true;
+
+    try {
+      const { answer, model } = await askManaGuide(question, buildCardContext(card));
+      waiting.replaceWith(assistantMessage(answer, "guide", model));
+      input.value = "";
+      count.textContent = `0/${ASSISTANT_QUESTION_LIMIT}`;
+    } catch (error) {
+      waiting.replaceWith(assistantMessage(error.message || "ManaGuide could not answer. Please try again.", "error"));
+    } finally {
+      form.classList.remove("is-loading");
+      input.disabled = false;
+      submit.disabled = false;
+      messages.scrollTop = messages.scrollHeight;
+      input.focus();
+    }
+  });
+
+  window.addEventListener("hashchange", refreshContext);
+}
+
+initAssistant();
 showRoute();
